@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="ConnSix/dummyai"/>
+	<classpathentry kind="src" path="ConnSix/src/main/java"/>
+	<classpathentry kind="lib" path="ConnSix/gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="output" path="ConnSix/bin"/>
+</classpath>
