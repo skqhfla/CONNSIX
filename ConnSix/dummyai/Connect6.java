@@ -9,8 +9,9 @@ public class Connect6 {
 	static int Ai = DummyAI.getAIColor();
 	static int opponent = DummyAI.getPlayerColor();	
 	
-	static int[] dx = {1, 1, 0, -1};
-	static int[] dy = {0, 1, 1, 1};
+	// Four direction: horizon, vertical, right-down diagonal, right-up diagonal.
+	static int[] dx = {1, 0, 1, 1};
+	static int[] dy = {0, 1, 1, -1};
 	
 	private static int[][] CopyBoard(int [][] originBoard) {
 		int[][] board = new int[ROW][COL];
@@ -41,8 +42,8 @@ public class Connect6 {
 		return x < 0 || y < 0 || x >= ROW || y >= COL;
 	}
 	
-	private static Boolean isImPossibleConn7(int [][] board, int d, int x, int y, int player) {
-		return !((IsOutOfBounds(x - dx[d], y - dy[d]) || board[x - dx[d]][y - dy[d]] != player) && (IsOutOfBounds(x + 6 * dx[d], y + 6 * dy[d]) || board[x + 6 * dx[d]][y + 6 * dy[d]] != player));
+	private static Boolean isImpossibleConn7(int [][] board, int d, int x, int y, int player) {
+		return (IsOutOfBounds(x - dx[d], y - dy[d]) || board[x - dx[d]][y - dy[d]] != player) && (IsOutOfBounds(x + 6 * dx[d], y + 6 * dy[d]) || board[x + 6 * dx[d]][y + 6 * dy[d]] != player);
 	}
 
 	// integer 형태의 이상적 좌표를 형식에 맞춘 String으로 바꿔 리턴(다음에 놓을 그거임. 스톤 하나하나 기준.)
@@ -69,16 +70,19 @@ public class Connect6 {
 			System.out.println("");
 		}
 		
+
+		// Check whether it is possible connect 6 stones
 		stones = isPossibleConn6(CopyBoard(playBoard), Ai);
 		if(stones != null)
 			return Result(stones);
 		
+		// Check whether there are some cases that the opposite could connect 6 stones
 		stones = isPossibleConn6(CopyBoard(playBoard), opponent);
 		if(stones != null)
 			return Result(stones);
 		
 		
-		System.out.println("No Stones");
+		System.out.println("No Stones -> Randomly");
 		
 		stones = new Stone[2];
 		
@@ -98,12 +102,13 @@ public class Connect6 {
 	}
 	
 	private static Stone FindOneStone(int [][] board, int player, int d, int x, int y) {
+
 		Stone stone = new Stone();
+
 		for (int i = 0; i < ROW; i++) {
             for (int j = 0; j < COL; j++) {
-                if (board[x][y] != Empty || (i == x - dx[d] && j == y - dy[d]) || (i == x + 6 * dx[d] && j == y + dx[d]))
+                if (board[j][i] != Empty || (i == x - dx[d] && j == y - dy[d]) || (i == x + 6 * dx[d] && j == y + 6 * dx[d]))
                     continue;
-
                 stone.setStone(i, j);
                 return stone;
             }
@@ -119,34 +124,24 @@ public class Connect6 {
 			stones[i] = new Stone();
 		
 		for(int d = 0; d < 4; d++) {
-			for(int y = 0; y < COL - 6; y++) {
-				for(int x = 0; x < ROW - 6; x++) {
+			for(int y = 0; y < ROW - 5 ; y++) {
+				for(int x = 0; x < COL - 5 ; x++) {
+
 					int playerStone = 0;
-					
-					if(IsOutOfBounds(x + 5 * dx[d], y + 5 * dy[d]))
-						continue;
-					
+
 					for(int i = 0; i < 6; i++) {
-						if(y == 9 && x == 10)
-							System.out.printf("[%d] ", board[x + i * dx[d]][y + i * dy[d]]);
-						
-						if(board[x + i * dx[d]][y + i * dy[d]] == player)
+
+						if(board[x + i * dx[d]][y + i * dy[d]] == player){
 							playerStone++;
+						}
 						else if(board[x + i * dx[d]][y + i * dy[d]] != Empty) {
 							playerStone = 0;
-							if(y == 9 && x == 10) {
-								System.out.println("stone reset " + board[x + i * dx[d]][y + i * dy[d]]);
-							}
-								
 							break;
 						}
 					}
-					if(y == 9 && x == 10)
-						System.out.println("dir = " + d);
-					
-						
-					if(playerStone >= 4 && !isImPossibleConn7(board, d, x, y, player)) {
-						System.out.println("Find " + x + " " + y + " color = " + player);
+										
+					if(playerStone >= 4 && isImpossibleConn7(board, d, x, y, player)) {
+
 						int putcnt = 0;
 						for (int i = 0; i < 6; i++) {
 	                        if (board[x + i*dx[d]][y + i*dy[d]] == Empty) {
@@ -160,9 +155,16 @@ public class Connect6 {
 						
 						stones[putcnt] = FindOneStone(board, player, d, x, y);
 						
+
+						// Two case: 1. There is no possible connect6. 2. There is no possible to loaction for FindOneStone
 						if(stones[putcnt].x == -1) {
-							System.out.println("no more");
+							System.out.println("no more location to locate additional stone.");
+							// Since the combination of two stones in stones is impossible, so make the location of stone[0] as empty and go to the next loop.
+							board[stones[0].x][stones[0].y] = Empty; 
 							stones[0].x = -1;
+						}
+						else {
+							return stones;
 						}
 					}
 				}
