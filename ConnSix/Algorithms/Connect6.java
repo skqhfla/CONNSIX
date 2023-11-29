@@ -109,7 +109,7 @@ public class Connect6 {
             for (int j = 0; j < COL; j++) {
                 if (board[j][i] != Empty || (i == x - dx[d] && j == y - dy[d]) || (i == x + 6 * dx[d] && j == y + 6 * dx[d]))
                     continue;
-                stone.setStone(i, j);
+                stone.setStone(j, i);
                 return stone;
             }
         }
