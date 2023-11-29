@@ -65,9 +65,10 @@ public class Connect6 {
 
 		// Check whether it is possible connect 6 stones
 		stones = isPossibleConn6(CopyBoard(playBoard), Ai);
-		if(stones != null && stones.getSecondStone().x != -1)
+		if(stones != null && stones.getSecondStone() != null)
 			return Result(stones);
-		else if(stones != null && stones.getSecondStone().x == -1){
+		else if(stones != null && stones.getSecondStone() == null){
+			stones.setSecondStone(new Stone());
 			do {
 				stones.setSecondStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
 			} while(!(consix.getStoneAt(stones.getSecondStone().getPosition()).equals("EMPTY")) || (stones.getSecondStone().x == stones.getFirstStone().x && stones.getSecondStone().y == stones.getFirstStone().y));
@@ -76,9 +77,10 @@ public class Connect6 {
 		
 		// Check whether there are some cases that the opposite could connect 6 stones
 		stones = isPossibleConn6Opponent(playBoard, opponent);
-		if(stones != null && stones.getSecondStone().x != -1)
+		if(stones != null && stones.getSecondStone() != null)
 			return Result(stones);
-		else if(stones != null && stones.getSecondStone().x == -1){
+		else if(stones != null && stones.getSecondStone() == null){
+			stones.setSecondStone(new Stone());
 			do {
 				stones.setSecondStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
 			} while(!(consix.getStoneAt(stones.getSecondStone().getPosition()).equals("EMPTY")) || (stones.getSecondStone().x == stones.getFirstStone().x && stones.getSecondStone().y == stones.getFirstStone().y));
@@ -259,11 +261,15 @@ public class Connect6 {
 
 		stoneCandidateList = getPossibleDefenceStones(board, 3 - opponent, stoneCandidateList);
 
-		Random random = new Random();
+		if(stoneCandidateList.size() > 0){
+			Random random = new Random();
+			int randomIndex = random.nextInt(stoneCandidateList.size());
 
-		int randomIndex = random.nextInt(stoneCandidateList.size());
+			return stoneCandidateList.get(randomIndex);
+		}
 
-		return stoneCandidateList.get(randomIndex);
+		return null;
+		
 	}
 
 	private Stones isPossibleConn6Opponent(int [][] board, int opponent) {
