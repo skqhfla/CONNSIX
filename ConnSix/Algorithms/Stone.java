@@ -14,6 +14,6 @@ public class Stone {
 	}
 	
 	public String getPosition() {
-		return String.format("%c%02d", (char) ((x < 8) ? (x + 'A') : (x + 'A' + 1)), Connect6.COL - y);
+		return String.format("%c%02d", (char) ((y < 8) ? (y + 'A') : (y + 'A' + 1)), 19 - x);
 	}
 }

@@ -1,9 +1,6 @@
 import java.util.Scanner;
 
 public class DummyAI {
-	static int Ai;
-	static int opponent;
-	static int red = 3;
 	
 	public static void main(String[] args) throws Exception {
 		Scanner scanner = new Scanner(System.in);
@@ -15,21 +12,23 @@ public class DummyAI {
 		String color = scanner.nextLine();
 		
 		ConnectSix conSix = new ConnectSix(ip, port, color);
+		Connect6 con = new Connect6();
 		System.out.println("Red Stone positions are " + conSix.redStones);
 
 		if (color.toLowerCase().compareTo("black") == 0) {
-			Ai = 1;
-			opponent = 2;
+			con.Ai = 1;
 			String first = conSix.drawAndRead("K10");
 		} else if (color.toLowerCase().compareTo("white") == 0) {
-			Ai = 2;
-			opponent = 1;
+			con.Ai = 2;
 			String first = conSix.drawAndRead("");
 		}
+
+		con.opponent = 3 - con.Ai;
+		con.Red = con.Ai + con.opponent;
 		
 		while (true) {
 			
-			String draw = Connect6.returnStringCoor(conSix);
+			String draw = con.returnStringCoor(conSix);
 			
 			String read = conSix.drawAndRead(draw);
 			
@@ -38,15 +37,5 @@ public class DummyAI {
 			}
 		}
 
-	}
-	
-		public static int getAIColor() {
-			return Ai;
-		}
-
-		public static int getPlayerColor() {
-				return opponent;
-		}	
-		
-			
+	}			
 }
