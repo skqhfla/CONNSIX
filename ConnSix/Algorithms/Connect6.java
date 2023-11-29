@@ -130,8 +130,8 @@ public class Connect6 {
 
 		System.out.println("player = " + player);
 		for(int d = 0; d < 4; d++) {
-			for(int R = 0; R < ROW - 5 ; R++) {
-				for(int C = 0; C < COL - 5 ; C++) {
+			for(int R = 0; R < ROW; R++) {
+				for(int C = 0; C < COL; C++) {
 					
 					if(IsOutOfBounds(R + 5 * dx[d], C + 5 * dy[d])){
 						continue;
@@ -151,12 +151,10 @@ public class Connect6 {
 					}
 										
 					if(playerStone >= 4) {
-						System.out.println("Stone = " + playerStone);
 						int putcnt = 0;
 						for (int i = 0; i < 6; i++) {
 	                        if (board[R + i*dx[d]][C + i*dy[d]] == Empty) {
 	                        	board[R + i*dx[d]][C + i*dy[d]] = player;
-								System.out.println("putcnt = " + putcnt);
 
 								if (putcnt++ == 0)
 									stones.setFirstStone(R + i*dx[d], C + i*dy[d]);
@@ -190,8 +188,8 @@ public class Connect6 {
 			canDefence = true;
 
 			for(int d = 0; d < 4; d++) {
-				for(int R = 0; R < ROW - 5 ; R++) {
-					for(int C = 0; C < COL - 5 ; C++) {
+				for(int R = 0; R < ROW; R++) {
+					for(int C = 0; C < COL; C++) {
 						
 						if(IsOutOfBounds(R + 5 * dx[d], C + 5 * dy[d])){
 							continue;
@@ -240,10 +238,10 @@ public class Connect6 {
 
 		if(stoneList.size() == 1){
 
-			Stones candiate = new Stones(stoneList.get(0).getFirstStone(), new Stone());
+			Stones candiate = new Stones(stoneList.get(0).getFirstStone(), null);
 			stoneCandidateList.add(candiate);
 
-			candiate = new Stones(stoneList.get(0).getSecondStone(), new Stone());
+			candiate = new Stones(stoneList.get(0).getSecondStone(), null);
 			stoneCandidateList.add(candiate);
 		}
 		else if(stoneList.size() == 2){
@@ -275,8 +273,8 @@ public class Connect6 {
 		
 		System.out.println("opponent = " + opponent);
 		for(int d = 0; d < 4; d++) {
-			for(int R = 0; R < ROW - 5 ; R++) {
-				for(int C = 0; C < COL - 5 ; C++) {
+			for(int R = 0; R < ROW; R++) {
+				for(int C = 0; C < COL; C++) {
 					
 					if(IsOutOfBounds(R + 5 * dx[d], C + 5 * dy[d])){
 						continue;
@@ -296,7 +294,7 @@ public class Connect6 {
 					}
 										
 					if(opponentStone >= 4) {
-
+						
 						Stone[] stones = new Stone[2];
 						int putcnt = 0;
 
@@ -304,7 +302,6 @@ public class Connect6 {
 	                        if (playboard[R + i*dx[d]][C + i*dy[d]] == Empty) {
 	                        	playboard[R + i*dx[d]][C + i*dy[d]] = Candidate;
 
-								System.out.println("putcnt = " + putcnt);
 								stones[putcnt] = new Stone();
 	                        	stones[putcnt++].setStone(R + i*dx[d], C + i*dy[d]);
 								
