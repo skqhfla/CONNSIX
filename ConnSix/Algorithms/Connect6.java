@@ -126,6 +126,11 @@ public class Connect6 {
 		for(int d = 0; d < 4; d++) {
 			for(int y = 0; y < ROW - 5 ; y++) {
 				for(int x = 0; x < COL - 5 ; x++) {
+					
+					if(IsOutOfBounds(x + 5 * dx[d], y + 5 * dy[d])){
+						continue;
+					}
+						
 
 					int playerStone = 0;
 
