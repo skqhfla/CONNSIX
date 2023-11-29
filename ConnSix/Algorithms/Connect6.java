@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Connect6 {
 
@@ -30,17 +31,8 @@ public class Connect6 {
 		return board;
 	}
 	
-	private void printBoard(int [][] board) {
-		for(int R = 0; R < ROW; R++) {
-			for(int C = 0; C < COL; C++) {
-				System.out.printf("[%3d]", board[R][C]);
-			}
-			System.out.println();
-		}
-	}
-	
-	private String Result(Stone[] stones) {		
-		return stones[0].getPosition() + ":" + stones[1].getPosition();
+	private String Result(Stones stones) {		
+		return stones.getPosition();
 	}
 	
 	private Boolean IsOutOfBounds(int x, int y) {
@@ -48,7 +40,7 @@ public class Connect6 {
 	}
 
 	public String returnStringCoor(ConnectSix consix) {
-		Stone[] stones;
+		Stones stones;
 		int[][] playBoard = new int[ROW][COL];
 
 		for (int R = 0; R < ROW; R++) {
@@ -73,33 +65,43 @@ public class Connect6 {
 
 		// Check whether it is possible connect 6 stones
 		stones = isPossibleConn6(CopyBoard(playBoard), Ai);
-		if(stones != null)
+		if(stones != null && stones.getSecondStone().x != -1)
 			return Result(stones);
+		else if(stones != null && stones.getSecondStone().x == -1){
+			do {
+				stones.setSecondStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
+			} while(!(consix.getStoneAt(stones.getSecondStone().getPosition()).equals("EMPTY")) || (stones.getSecondStone().x == stones.getFirstStone().x && stones.getSecondStone().y == stones.getFirstStone().y));
+			return Result(stones);
+		}
 		
 		// Check whether there are some cases that the opposite could connect 6 stones
-		// ArrayList<Stones> stoneList = isPossibleConn6Opponent(CopyBoard(playBoard), opponent);
-		// if(stoneList != null){
-		// 	Stones stonesSet = stoneList.get(0);
-		// 	stones = new Stone[2];
-		// 	stones[0] = stonesSet.getOneStone();
-		// 	stones[1] = stonesSet.getTwoStone();
-		// 	return Result(stones);
-		// }
+		stones = isPossibleConn6Opponent(playBoard, opponent);
+		if(stones != null && stones.getSecondStone().x != -1)
+			return Result(stones);
+		else if(stones != null && stones.getSecondStone().x == -1){
+			do {
+				stones.setSecondStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
+			} while(!(consix.getStoneAt(stones.getSecondStone().getPosition()).equals("EMPTY")) || (stones.getSecondStone().x == stones.getFirstStone().x && stones.getSecondStone().y == stones.getFirstStone().y));
+			return Result(stones);
+		}
 			
 		
 		
 		System.out.println("No Stones -> Randomly");
-		
-		stones = new Stone[2];
-		
-		for(int i = 0; i < 2; i++)
-			stones[i] = new Stone();
+	
+		stones = new Stones();
 		
 		for(int i = 0; i < 2; i++) {
+			Stone stone = new Stone();
 			do {
-				stones[i].setStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
-			} while(consix.getStoneAt(stones[i].getPosition()).equals("EMPTY") != true && playBoard[stones[i].x][stones[i].y] != Empty);
-			playBoard[stones[i].x][stones[i].y] = Ai;
+				stone.setStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
+			} while(consix.getStoneAt(stone.getPosition()).equals("EMPTY") != true && playBoard[stone.x][stone.y] != Empty);
+			playBoard[stone.x][stone.y] = Ai;
+			
+			if(i == 0)
+				stones.setFirstStone(stone);
+			else
+				stones.setSecondStone(stone);
 		}
 	
 
@@ -123,8 +125,9 @@ public class Connect6 {
 		return null;
 	}
 	
-	private Stone[] isPossibleConn6(int [][] board, int player) {
-		Stone[] stones = new Stone[2];
+	private Stones isPossibleConn6(int [][] board, int player) {
+		Stones stones = new Stones();
+
 		System.out.println("player = " + player);
 		for(int d = 0; d < 4; d++) {
 			for(int R = 0; R < ROW - 5 ; R++) {
@@ -154,28 +157,16 @@ public class Connect6 {
 	                        if (board[R + i*dx[d]][C + i*dy[d]] == Empty) {
 	                        	board[R + i*dx[d]][C + i*dy[d]] = player;
 								System.out.println("putcnt = " + putcnt);
-								stones[putcnt] = new Stone();
-	                        	stones[putcnt++].setStone(R + i*dx[d], C + i*dy[d]);
-								
+
+								if (putcnt++ == 0)
+									stones.setFirstStone(R + i*dx[d], C + i*dy[d]);
+								else
+									stones.setSecondStone(R + i*dx[d], C + i*dy[d]);								
 	                        }
 	                    }
 						
-						if(putcnt == 2)
+						if(putcnt != 0)
 							return stones;
-						
-						stones[putcnt] = FindOneStone(board, player);
-						
-
-						// Two case: 1. There is no possible connect6. 2. There is no possible to loaction for FindOneStone
-						if(stones[putcnt] == null) {
-							System.out.println("no more location to locate additional stone.");
-							// Since the combination of two stones in stones is impossible, so make the location of stone[0] as empty and go to the next loop.
-							board[stones[0].x][stones[0].y] = Empty; 
-							stones[0] = null;
-						}
-						else {
-							return stones;
-						}
 					}
 				}
 			}
@@ -184,7 +175,102 @@ public class Connect6 {
 		return null;
 	}
 
-	private ArrayList<Stones> isPossibleConn6Opponent(int [][] board, int opponent) {
+	private ArrayList<Stones> getPossibleDefenceStones(int [][] board, int player, ArrayList<Stones> stoneList){
+		int opponent = 3 - player;
+		boolean canDefence = true;
+
+		for(int idx = 0; idx < stoneList.size(); idx++){
+			Stone first = stoneList.get(idx).getFirstStone();
+			Stone second = stoneList.get(idx).getSecondStone();
+
+			board[first.x][first.y] = player;
+			if(second != null)
+				board[second.x][second.y] = player;
+
+			canDefence = true;
+
+			for(int d = 0; d < 4; d++) {
+				for(int R = 0; R < ROW - 5 ; R++) {
+					for(int C = 0; C < COL - 5 ; C++) {
+						
+						if(IsOutOfBounds(R + 5 * dx[d], C + 5 * dy[d])){
+							continue;
+						}
+
+						int opponentStone = 0;
+
+						for(int i = 0; i < 6; i++) {
+
+							if(board[R + i * dx[d]][C + i * dy[d]] == opponent){
+								opponentStone++;
+							}
+							else if(board[R + i * dx[d]][C + i * dy[d]] != Empty) {
+								opponentStone = 0;
+								break;
+							}
+						}
+											
+						if(opponentStone >= 4) {
+							canDefence = false;
+							break;
+						}
+					}
+
+					if(!canDefence)
+						break;
+				}
+				
+				if(!canDefence){
+					stoneList.remove(idx);
+					idx--;
+					break;
+				}
+			}
+
+			board[first.x][first.y] = Empty;
+			if(second != null)
+				board[second.x][second.y] = Empty;
+		}
+
+		return stoneList;
+	}
+
+	private Stones ChooseFromCandidate(int [][] board, int opponent, ArrayList<Stones> stoneList){
+		ArrayList<Stones> stoneCandidateList = new ArrayList<>();
+
+		if(stoneList.size() == 1){
+
+			Stones candiate = new Stones(stoneList.get(0).getFirstStone(), new Stone());
+			stoneCandidateList.add(candiate);
+
+			candiate = new Stones(stoneList.get(0).getSecondStone(), new Stone());
+			stoneCandidateList.add(candiate);
+		}
+		else if(stoneList.size() == 2){
+			Stones[] candiateList = new Stones[4];
+
+			candiateList[0] = new Stones(stoneList.get(0).getFirstStone(), stoneList.get(1).getFirstStone());
+			candiateList[1] = new Stones(stoneList.get(0).getSecondStone(), stoneList.get(1).getFirstStone());
+			candiateList[2] = new Stones(stoneList.get(0).getFirstStone(), stoneList.get(1).getSecondStone());
+			candiateList[3] = new Stones(stoneList.get(0).getSecondStone(), stoneList.get(1).getSecondStone());
+
+			for(int i = 0; i < 4; i++){
+				stoneCandidateList.add(candiateList[i]);
+			}
+		}
+
+		stoneCandidateList = getPossibleDefenceStones(board, 3 - opponent, stoneCandidateList);
+
+		Random random = new Random();
+
+		int randomIndex = random.nextInt(stoneCandidateList.size());
+
+		return stoneCandidateList.get(randomIndex);
+	}
+
+	private Stones isPossibleConn6Opponent(int [][] board, int opponent) {
+		int[][] playboard = CopyBoard(board);
+
 		ArrayList<Stones> stoneList = new ArrayList<>();
 		
 		System.out.println("opponent = " + opponent);
@@ -200,23 +286,23 @@ public class Connect6 {
 
 					for(int i = 0; i < 6; i++) {
 
-						if(board[R + i * dx[d]][C + i * dy[d]] == opponent){
+						if(playboard[R + i * dx[d]][C + i * dy[d]] == opponent){
 							opponentStone++;
 						}
-						else if(board[R + i * dx[d]][C + i * dy[d]] != Empty) {
+						else if(playboard[R + i * dx[d]][C + i * dy[d]] != Empty) {
 							opponentStone = 0;
 							break;
 						}
 					}
 										
 					if(opponentStone >= 4) {
-						
+
 						Stone[] stones = new Stone[2];
 						int putcnt = 0;
 
 						for (int i = 0; i < 6; i++) {
-	                        if (board[R + i*dx[d]][C + i*dy[d]] == Empty) {
-	                        	board[R + i*dx[d]][C + i*dy[d]] = Candidate;
+	                        if (playboard[R + i*dx[d]][C + i*dy[d]] == Empty) {
+	                        	playboard[R + i*dx[d]][C + i*dy[d]] = Candidate;
 
 								System.out.println("putcnt = " + putcnt);
 								stones[putcnt] = new Stone();
@@ -228,16 +314,16 @@ public class Connect6 {
 						Stones stoneSet = new Stones(stones[0], stones[1]);
 
 						stoneList.add(stoneSet);
+
+						if(stoneList.size() == 2)
+							break;
 					}
 				}
 			}
 		}
 
-		// if(stoneList.size() == 0)
-		// 	return null;
-		// else if(stoneList.size() == 1){
-		// 	Stone stone = stoneList.get(0).getOneStone();
-		// }
+		if(stoneList.size() != 0)
+			return ChooseFromCandidate(board, opponent, stoneList);
 
 		return null;
 		
