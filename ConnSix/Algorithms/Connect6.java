@@ -39,6 +39,15 @@ public class Connect6 {
 		return x < 0 || y < 0 || x >= ROW || y >= COL;
 	}
 
+	private Stone getRandomStone(int[][] playBoard){
+		Stone stone = new Stone();
+			do {
+				stone.setStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
+			} while(playBoard[stone.x][stone.y] != Empty);
+
+		return stone;
+	}
+
 	public String returnStringCoor(ConnectSix consix) {
 		Stones stones;
 		int[][] playBoard = new int[ROW][COL];
@@ -63,50 +72,35 @@ public class Connect6 {
 		}
 		
 
-		// Check whether it is possible connect 6 stones
-		stones = isPossibleConn6(CopyBoard(playBoard), Ai);
-		if(stones != null && stones.getSecondStone() != null)
-			return Result(stones);
-		else if(stones != null && stones.getSecondStone() == null){
-			stones.setSecondStone(new Stone());
-			do {
-				stones.setSecondStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
-			} while(!(consix.getStoneAt(stones.getSecondStone().getPosition()).equals("EMPTY")) || (stones.getSecondStone().x == stones.getFirstStone().x && stones.getSecondStone().y == stones.getFirstStone().y));
-			return Result(stones);
-		}
-		
-		// Check whether there are some cases that the opposite could connect 6 stones
-		stones = isPossibleConn6Opponent(playBoard, opponent);
-		if(stones != null && stones.getSecondStone() != null)
-			return Result(stones);
-		else if(stones != null && stones.getSecondStone() == null){
-			stones.setSecondStone(new Stone());
-			do {
-				stones.setSecondStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
-			} while(!(consix.getStoneAt(stones.getSecondStone().getPosition()).equals("EMPTY")) || (stones.getSecondStone().x == stones.getFirstStone().x && stones.getSecondStone().y == stones.getFirstStone().y));
-			return Result(stones);
-		}
+		for(int i = 0 ; i < 2 ; i++){
+			if(i % 2 == 0)
+				stones = isPossibleConn6(CopyBoard(playBoard), Ai); // Check whether it is possible connect 6 stones
+			else
+				stones = isPossibleConn6Opponent(playBoard, opponent); // Check whether there are some cases that the opposite could connect 6 stones
 			
-		
+			if(stones != null){
+				if(stones.getSecondStone() != null)
+					return Result(stones);
+				else{
+					playBoard[stones.getFirstStone().x][stones.getFirstStone().y] = Ai;
+					stones.setSecondStone(getRandomStone(playBoard));
+					return Result(stones);
+				}
+			}
+		}
 		
 		System.out.println("No Stones -> Randomly");
-	
+		// Randomly Put
 		stones = new Stones();
 		
-		for(int i = 0; i < 2; i++) {
-			Stone stone = new Stone();
-			do {
-				stone.setStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
-			} while(consix.getStoneAt(stone.getPosition()).equals("EMPTY") != true && playBoard[stone.x][stone.y] != Empty);
-			playBoard[stone.x][stone.y] = Ai;
-			
-			if(i == 0)
-				stones.setFirstStone(stone);
+		for(int i = 0; i < 2; i++) {	
+			if(i == 0){
+				stones.setFirstStone(getRandomStone(playBoard));
+				playBoard[stones.getFirstStone().x][stones.getFirstStone().y] = Ai;
+			}
 			else
-				stones.setSecondStone(stone);
+				stones.setSecondStone(getRandomStone(playBoard));
 		}
-	
-
 
 		return Result(stones);
 
