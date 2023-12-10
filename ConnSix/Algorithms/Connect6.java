@@ -31,6 +31,15 @@ public class Connect6 {
 
 		putStones(redStones, Red);
 	}
+
+	private void printBoard(int [][] board){
+		for(int i = 0; i < ROW; i++){
+			for(int j = 0; j < COL; j++){
+				System.out.print(board[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
 	
 	private int[][] CopyBoard(int [][] originBoard) {
 		int[][] board = new int[ROW][COL];
@@ -62,7 +71,7 @@ public class Connect6 {
 		return stone;
 	}
 
-	private void putStones(String stonesArr, int color){
+	public void putStones(String stonesArr, int color){
 		if(stonesArr == null)
 			return;
 
@@ -335,26 +344,32 @@ public class Connect6 {
 	}
 
 	private Stones findBestStones(int [][] board, int player){
+        System.out.println("Start of findBestStones!");
+        Stones bestStones = new Stones();
+        int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        List<Stones> legalStonesArr = getLegalStones(board, player);
 
-		System.out.println("Start of findBestStones!");
-
-		Stones bestStones = new Stones();
-		int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-
-		for (Stones legalStones : getLegalStones(board, player)) {
-			System.out.println("Stones in LegalStones: " + legalStones.getPosition());
-            applyStones(board, legalStones, player);
-            int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
-            undoStones(board, legalStones);
-            if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
-                bestStones.first = legalStones.first;
-				bestStones.second = legalStones.second;
-                bestValue = boardValue;
-            }
+		System.out.println("LegalStones size = " + legalStonesArr.size());
+        for (Stones legalStones : legalStonesArr) {
+            System.out.println("Stones in LegalStones: " + legalStones.getPosition());
         }
-
-        return bestStones;
-	}
+        // for (Stones legalStones : getLegalStones(board, player)) {
+        //  System.out.println("Stones in LegalStones: ” + legalStones.getPosition());
+        //     applyStones(board, legalStones, player);
+        //     int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
+        //     undoStones(board, legalStones);
+        //     if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
+        //         bestStones.first = legalStones.first;
+        //      bestStones.second = legalStones.second;
+        //         bestValue = boardValue;
+        //     }
+        // }
+        Random random = new Random();
+        // List의 크기에 맞게 랜덤한 인덱스 생성
+        int randomIndex = random.nextInt(legalStonesArr.size());
+        // 랜덤하게 선택된 원소 반환
+        return legalStonesArr.get(randomIndex);
+    }
 
 	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         if (depth == 0 || isTerminal(board)) {
@@ -389,22 +404,34 @@ public class Connect6 {
 	}
 
 	private List<Stones> getLegalStones(int[][] board, int player) {
+
+		int[][] tempBoard = CopyBoard(board);
+		printBoard(tempBoard);
+		int OCCUPIED = -5;
+
         List<Stones> legalStones = new ArrayList<>();
         for (int i = 0; i < ROW; i++) {
             for (int j = 0; j < COL; j++) {
-                if (board[i][j] == EMPTY) {
-                    board[i][j] = player;
+                if (tempBoard[i][j] == EMPTY) {
+                    tempBoard[i][j] = player;
                     for (int k = 0; k < ROW; k++) {
                         for (int l = 0; l < COL; l++) {
-                            if (board[k][l] == EMPTY && !(k == i && l == j)) {
+                            if (tempBoard[k][l] == EMPTY) {
                                 legalStones.add(new Stones(i, j, k, l));
                             }
                         }
                     }
-                    board[i][j] = EMPTY;
+                    tempBoard[i][j] = EMPTY;
                 }
+				tempBoard[i][j] = OCCUPIED;
             }
         }
+
+		printBoard(tempBoard);
+		// System.out.println("LegalStones: " + legalStones.size());
+		// for(Stones stones : legalStones){
+		// 	System.out.println(stones.getPosition());
+		// }
         return legalStones;
     }
 

@@ -19,6 +19,7 @@ public class DummyAI {
 
 		if (color.toLowerCase().compareTo("black") == 0) {
 			con.Ai = 1;
+			con.putStones("K10", con.Ai);
 			read = conSix.drawAndRead("K10");
 		} else if (color.toLowerCase().compareTo("white") == 0) {
 			con.Ai = 2;
