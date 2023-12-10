@@ -341,29 +341,42 @@ public class Connect6 {
 		Stones bestStones = new Stones();
 		int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-		for (Stones legalStones : getLegalStones(board, player)) {
+		List<Stones> legalStonesArr = getLegalStones(board, player);
+		for (Stones legalStones : legalStonesArr) {
 			System.out.println("Stones in LegalStones: " + legalStones.getPosition());
-            applyStones(board, legalStones, player);
-            int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
-            undoStones(board, legalStones);
-            if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
-                bestStones.first = legalStones.first;
-				bestStones.second = legalStones.second;
-                bestValue = boardValue;
-            }
-        }
+		} 	
+		// for (Stones legalStones : getLegalStones(board, player)) {
+		// 	System.out.println("Stones in LegalStones: " + legalStones.getPosition());
+        //     applyStones(board, legalStones, player);
+        //     int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
+        //     undoStones(board, legalStones);
+        //     if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
+        //         bestStones.first = legalStones.first;
+		// 		bestStones.second = legalStones.second;
+        //         bestValue = boardValue;
+        //     }
+        // }
 
-        return bestStones;
+		Random random = new Random();
+
+        // List의 크기에 맞게 랜덤한 인덱스 생성
+        int randomIndex = random.nextInt(legalStonesArr.size());
+
+        // 랜덤하게 선택된 원소 반환
+        return legalStonesArr.get(randomIndex);
 	}
 
 	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         if (depth == 0 || isTerminal(board)) {
+			System.out.println("done alphabeta");
             return evaluate(board);
         }
 
         if (maximizingPlayer) {
             int value = Integer.MIN_VALUE;
-            for (Stones legalStones : getLegalStones(board, BLACK)) {
+			List<Stones> legalStonesArr = getLegalStones(board, BLACK);
+            for (Stones legalStones : legalStonesArr) {
+				System.out.println("alphabeta Stones in LegalStones: " + legalStones.getPosition());
                 applyStones(board, legalStones, BLACK);
                 value = Math.max(value, alphabeta(board, depth - 1, alpha, beta, false));
                 undoStones(board, legalStones);
@@ -375,7 +388,8 @@ public class Connect6 {
             return value;
         } else {
             int value = Integer.MAX_VALUE;
-            for (Stones legalStones : getLegalStones(board, WHITE)) {
+            List<Stones> legalStonesArr = getLegalStones(board, WHITE);
+            for (Stones legalStones : legalStonesArr) {
                 applyStones(board, legalStones, WHITE);
                 value = Math.min(value, alphabeta(board, depth - 1, alpha, beta, true));
                 undoStones(board, legalStones);
@@ -394,8 +408,19 @@ public class Connect6 {
             for (int j = 0; j < COL; j++) {
                 if (board[i][j] == EMPTY) {
                     board[i][j] = player;
-                    for (int k = 0; k < ROW; k++) {
-                        for (int l = 0; l < COL; l++) {
+
+					for(int r = i + 1; r < ROW; r++){
+						if (board[r][j] == EMPTY)
+							legalStones.add(new Stones(i, j, r, j));
+					}
+
+					for(int d = j + 1; d < COL; d++){
+						if (board[i][d] == EMPTY)
+							legalStones.add(new Stones(i, j, i, d));
+					}
+
+                    for (int k = i + 1; k < ROW; k++) {
+                        for (int l = j + 1; l < COL; l++) {
                             if (board[k][l] == EMPTY && !(k == i && l == j)) {
                                 legalStones.add(new Stones(i, j, k, l));
                             }
@@ -405,6 +430,9 @@ public class Connect6 {
                 }
             }
         }
+
+		System.out.println("getLegalStones : " + legalStones.size());
+
         return legalStones;
     }
 
