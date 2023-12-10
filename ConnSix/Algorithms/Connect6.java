@@ -353,10 +353,10 @@ public class Connect6 {
 
         if (maximizingPlayer) {
             int value = Integer.MIN_VALUE;
-            for (legalStones[] stones : getLegalStones(board, BLACK)) {
-                applyStones(board, Stones, BLACK);
+            for (Stones legalStones : getLegalStones(board, BLACK)) {
+                applyStones(board, legalStones, BLACK);
                 value = Math.max(value, alphabeta(board, depth - 1, alpha, beta, false));
-                undoStones(board, Stones);
+                undoStones(board, legalStones);
                 alpha = Math.max(alpha, value);
                 if (alpha >= beta) {
                     break; // beta cut-off
@@ -365,10 +365,10 @@ public class Connect6 {
             return value;
         } else {
             int value = Integer.MAX_VALUE;
-            for (legalStones[] stones : getLegalStones(board, WHITE)) {
-                applyStones(board, Stones, WHITE);
+            for (Stones legalStones : getLegalStones(board, WHITE)) {
+                applyStones(board, legalStones, WHITE);
                 value = Math.min(value, alphabeta(board, depth - 1, alpha, beta, true));
-                undoStones(board, Stones);
+                undoStones(board, legalStones);
                 beta = Math.min(beta, value);
                 if (beta <= alpha) {
                     break; // alpha cut-off
