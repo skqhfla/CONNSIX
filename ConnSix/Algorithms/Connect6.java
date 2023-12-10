@@ -418,7 +418,7 @@ public class Connect6 {
 	private boolean isTerminal(int[][] board) {
 		// 흑돌과 백돌 모두에 대해 승리 조건을 검사
 		return checkLines(board, BLACK) || checkLines(board, WHITE);
-	   }
+	}
 	
 	private boolean checkLines(int[][] board, int player) {
 		for (int i = 0; i < ROW; i++) {
