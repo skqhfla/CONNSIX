@@ -6,12 +6,14 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	static int Empty = 0;
-	static int Candidate = -1;
+	int MAX_DEPTH = 3;
+	int EMPTY = 0;
+	int BLACK = 1;
+	int WHITE = 2;
+	int Candidate = -1;
 	public int Red = 3;
 	public int Ai;
 	public int opponent;
-
 	
 	// Four direction: horizon, vertical, right-down diagonal, right-up diagonal.
 	int[] dx = {1, 0, 1, 1};
@@ -22,7 +24,7 @@ public class Connect6 {
 	public Connect6(String redStones){
 		for(int i = 0; i < 19; i++){
 			for(int j = 0; j < 19; j++){
-				playBoard[i][j] = Empty;
+				playBoard[i][j] = EMPTY;
 			}
 		}
 
@@ -54,7 +56,7 @@ public class Connect6 {
 		Stone stone = new Stone();
 			do {
 				stone.setStone((int) (Math.random() * 19), (int) (Math.random() * 19));			
-			} while(playBoard[stone.x][stone.y] != Empty);
+			} while(playBoard[stone.x][stone.y] != EMPTY);
 
 		return stone;
 	}
@@ -99,7 +101,7 @@ public class Connect6 {
 			}
 		}
 		
-		stones = findBestStones(playboard, Ai);
+		stones = findBestStones(board, Ai);
 
 		return Result(stones);
 
@@ -108,7 +110,7 @@ public class Connect6 {
 	private Stone FindOneStone(int [][] board, int player) {
 		for (int i = 0; i < ROW; i++) {
             for (int j = 0; j < COL; j++) {
-                if (board[i][j] != Empty)
+                if (board[i][j] != EMPTY)
                     continue;
 
 				Stone stone = new Stone();
@@ -139,7 +141,7 @@ public class Connect6 {
 						if(board[R + i * dx[d]][C + i * dy[d]] == player){
 							playerStone++;
 						}
-						else if(board[R + i * dx[d]][C + i * dy[d]] != Empty) {
+						else if(board[R + i * dx[d]][C + i * dy[d]] != EMPTY) {
 							playerStone = 0;
 							break;
 						}
@@ -148,7 +150,7 @@ public class Connect6 {
 					if(playerStone >= 4) {
 						int putcnt = 0;
 						for (int i = 0; i < 6; i++) {
-	                        if (board[R + i*dx[d]][C + i*dy[d]] == Empty) {
+	                        if (board[R + i*dx[d]][C + i*dy[d]] == EMPTY) {
 	                        	board[R + i*dx[d]][C + i*dy[d]] = player;
 
 								if (putcnt++ == 0)
@@ -197,7 +199,7 @@ public class Connect6 {
 							if(board[R + i * dx[d]][C + i * dy[d]] == opponent){
 								opponentStone++;
 							}
-							else if(board[R + i * dx[d]][C + i * dy[d]] != Empty) {
+							else if(board[R + i * dx[d]][C + i * dy[d]] != EMPTY) {
 								opponentStone = 0;
 								break;
 							}
@@ -220,9 +222,9 @@ public class Connect6 {
 				}
 			}
 
-			board[first.x][first.y] = Empty;
+			board[first.x][first.y] = EMPTY;
 			if(second != null)
-				board[second.x][second.y] = Empty;
+				board[second.x][second.y] = EMPTY;
 		}
 
 		return stoneList;
@@ -286,7 +288,7 @@ public class Connect6 {
 						if(playboard[R + i * dx[d]][C + i * dy[d]] == opponent){
 							opponentStone++;
 						}
-						else if(playboard[R + i * dx[d]][C + i * dy[d]] != Empty) {
+						else if(playboard[R + i * dx[d]][C + i * dy[d]] != EMPTY) {
 							opponentStone = 0;
 							break;
 						}
@@ -298,7 +300,7 @@ public class Connect6 {
 						int putcnt = 0;
 
 						for (int i = 0; i < 6; i++) {
-	                        if (playboard[R + i*dx[d]][C + i*dy[d]] == Empty) {
+	                        if (playboard[R + i*dx[d]][C + i*dy[d]] == EMPTY) {
 	                        	playboard[R + i*dx[d]][C + i*dy[d]] = Candidate;
 
 								stones[putcnt] = new Stone();
@@ -396,16 +398,52 @@ public class Connect6 {
         return legalStones;
     }
 
-	public static void applyStones(int[][] board, Stones stones, int player) {
+	private void applyStones(int[][] board, Stones stones, int player) {
         for (Stone stone : stones) {
             board[stone.x][stone.y] = player;
         }
     }
 
-    public static void undoMove(int[][] board, Stones stones) {
+    private void undoMove(int[][] board, Stones stones) {
         for (Stone stone : stones) {
             board[stone.x][stone.y] = EMPTY;
         }
+    }
+
+	private boolean isTerminal(int[][] board) {
+		// 흑돌과 백돌 모두에 대해 승리 조건을 검사
+		return checkLines(board, BLACK) || checkLines(board, WHITE);
+	   }
+	
+	private boolean checkLines(int[][] board, int player) {
+		for (int i = 0; i < ROW; i++) {
+			for (int j = 0; j < COL; j++) {
+				if (board[i][j] == player) {
+					for(int d = 0; d < 4; d++){
+						if(checkExactStones(board, i, j, dx[d], dy[d], player))
+							return true;
+					}
+				}
+			}
+		}
+
+		return false;
+    }
+
+	private boolean checkExactStones(int[][] board, int x, int y, int dx, int dy, int player) {
+        int count = 0;
+        while (x >= 0 && x < ROW && y >= 0 && y < COL && board[x][y] == player) {
+            count++;
+            x += dx;
+            y += dy;
+        }
+		
+        return count > 5;
+    }
+
+	private int evaluate(int[][] board) {
+        
+        return 0;
     }
 
 }
