@@ -19,6 +19,7 @@ public class Connect6 {
 	// Four direction: horizon, vertical, right-down diagonal, right-up diagonal.
 	int[] dx = {1, 0, 1, 1};
 	int[] dy = {0, 1, 1, -1};
+	int[] stoneValue = {1, 3, 6, 12, 30, 100};
 
 	int[][] playBoard = new int[ROW][COL];
 
@@ -371,7 +372,7 @@ public class Connect6 {
 	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         if (depth == 0 || isTerminal(board)) {
 			System.out.println("done alphabeta");
-            return evaluate(board);
+            return evaluate(board, (maximizingPlayer) ? WHITE : BLACK);
         }
 
         if (maximizingPlayer) {
@@ -477,9 +478,42 @@ public class Connect6 {
         return count > 5;
     }
 
-	private int evaluate(int[][] board) {
-        
-        return 5;
+	private int evaluate(int[][] board, int player) {
+		int value = 0;
+		
+
+        for(int R = 0; R < ROW; R++){
+			for(int C = 0; C < COL; C++){
+				int[] tempValue = new int[4];
+
+				for(int d = 0; d < 4; d++){
+					if(IsOutOfBounds(R + 5 * dx[d], C + 5 * dy[d])){
+						continue;
+					}
+
+					int stones = 0;
+
+					for(int i = 0; i < 6; i++) {
+
+						if(board[R + i * dx[d]][C + i * dy[d]] == player){
+							stones++;
+						}
+						else if(board[R + i * dx[d]][C + i * dy[d]] != EMPTY) {
+							stones = 0;
+							break;
+						}
+					}
+
+					tempValue[d] = stones;
+
+					if(stones > 0)
+						value += stoneValue[stones - 1];
+
+				}
+			}
+		}
+
+		return value;
     }
 
 }
