@@ -63,11 +63,11 @@ public class Connect6 {
 	}
 
 	private void putStones(String stonesArr, int color){
+		if(stonesArr == null)
+			return;
+
 		String[] stones = stonesArr.split(":");
 
-		if(stones.size()  == 0)
-			return;
-			
 		for(String stone : stones){
 			char charValue = stone.charAt(0);
 			int numericValue = Integer.parseInt(stone.substring(1));
