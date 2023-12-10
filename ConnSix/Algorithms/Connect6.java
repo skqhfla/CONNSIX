@@ -102,7 +102,9 @@ public class Connect6 {
 			}
 		}
 		
+		System.out.println("End of checking possibilites");
 		stones = findBestStones(board, Ai);
+		System.out.println("End of findBestStones");
 
 		return Result(stones);
 
@@ -330,10 +332,13 @@ public class Connect6 {
 
 	private Stones findBestStones(int [][] board, int player){
 
+		System.out.println("Start of findBestStones!");
+
 		Stones bestStones = new Stones();
 		int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
 		for (Stones legalStones : getLegalStones(board, player)) {
+			System.out.println("Stones in LegalStones: " + legalStones.getPosition());
             applyStones(board, legalStones, player);
             int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
             undoStones(board, legalStones);
@@ -448,7 +453,7 @@ public class Connect6 {
 
 	private int evaluate(int[][] board) {
         
-        return 0;
+        return 5;
     }
 
 }
