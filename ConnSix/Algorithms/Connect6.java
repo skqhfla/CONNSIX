@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Connect6 {
@@ -332,13 +333,13 @@ public class Connect6 {
 		Stones bestStones = new Stones();
 		int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-		for (legalStones[] stones : getLegalStoness(board, player)) {
-            applyMove(board, stones, player);
+		for (Stones legalStones : getLegalStones(board, player)) {
+            applyStones(board, legalStones, player);
             int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
-            undoMove(board, stones);
+            undoStones(board, legalStones);
             if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
-                bestStones.first = stones.first;
-				bestStones.second = stones.second;
+                bestStones.first = legalStones.first;
+				bestStones.second = legalStones.second;
                 bestValue = boardValue;
             }
         }
@@ -378,7 +379,7 @@ public class Connect6 {
         }
 	}
 
-	private List<Stones> getLegalMoves(int[][] board, int player) {
+	private List<Stones> getLegalStones(int[][] board, int player) {
         List<Stones> legalStones = new ArrayList<>();
         for (int i = 0; i < ROW; i++) {
             for (int j = 0; j < COL; j++) {
@@ -387,7 +388,7 @@ public class Connect6 {
                     for (int k = 0; k < ROW; k++) {
                         for (int l = 0; l < COL; l++) {
                             if (board[k][l] == EMPTY && !(k == i && l == j)) {
-                                legalMoves.add(new Stones(i, j, k, l));
+                                legalStones.add(new Stones(i, j, k, l));
                             }
                         }
                     }
@@ -399,15 +400,19 @@ public class Connect6 {
     }
 
 	private void applyStones(int[][] board, Stones stones, int player) {
-        for (Stone stone : stones) {
-            board[stone.x][stone.y] = player;
-        }
+		Stone firstStone = stones.getFirstStone();
+		Stone secondStone = stones.getSecondStone();
+
+		board[firstStone.x][firstStone.y] = player;
+		board[secondStone.x][secondStone.y] = player;
     }
 
-    private void undoMove(int[][] board, Stones stones) {
-        for (Stone stone : stones) {
-            board[stone.x][stone.y] = EMPTY;
-        }
+    private void undoStones(int[][] board, Stones stones) {
+		Stone firstStone = stones.getFirstStone();
+		Stone secondStone = stones.getSecondStone();
+
+		board[firstStone.x][firstStone.y] = EMPTY;
+		board[secondStone.x][secondStone.y] = EMPTY;
     }
 
 	private boolean isTerminal(int[][] board) {
