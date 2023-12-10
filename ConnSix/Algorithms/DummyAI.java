@@ -12,25 +12,26 @@ public class DummyAI {
 		String color = scanner.nextLine();
 		
 		ConnectSix conSix = new ConnectSix(ip, port, color);
-		Connect6 con = new Connect6();
+		Connect6 con = new Connect6(conSix.redStones);
 		System.out.println("Red Stone positions are " + conSix.redStones);
+
+		String read = "";
 
 		if (color.toLowerCase().compareTo("black") == 0) {
 			con.Ai = 1;
-			String first = conSix.drawAndRead("K10");
+			read = conSix.drawAndRead("K10");
 		} else if (color.toLowerCase().compareTo("white") == 0) {
 			con.Ai = 2;
-			String first = conSix.drawAndRead("");
+			read = conSix.drawAndRead("");
 		}
 
 		con.opponent = 3 - con.Ai;
-		con.Red = con.Ai + con.opponent;
 		
 		while (true) {
 			
-			String draw = con.returnStringCoor(conSix);
+			String draw = con.returnStringCoor(read);
 			
-			String read = conSix.drawAndRead(draw);
+			read = conSix.drawAndRead(draw);
 			
 			if(read.compareTo("WIN") == 0 || read.compareTo("LOSE") == 0 || read.compareTo("EVEN") == 0) {
 				 break;
