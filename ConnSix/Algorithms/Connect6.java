@@ -349,26 +349,23 @@ public class Connect6 {
         int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         List<Stones> legalStonesArr = getLegalStones(board, player);
 
-		System.out.println("LegalStones size = " + legalStonesArr.size());
-        for (Stones legalStones : legalStonesArr) {
-            System.out.println("Stones in LegalStones: " + legalStones.getPosition());
+        for (Stones legalStones : getLegalStones(board, player)) {
+         System.out.println("Stones in LegalStones: " + legalStones.getPosition());
+            applyStones(board, legalStones, player);
+            int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
+            undoStones(board, legalStones);
+            if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
+                bestStones.first = legalStones.first;
+             bestStones.second = legalStones.second;
+                bestValue = boardValue;
+            }
         }
-        // for (Stones legalStones : getLegalStones(board, player)) {
-        //  System.out.println("Stones in LegalStones: ” + legalStones.getPosition());
-        //     applyStones(board, legalStones, player);
-        //     int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
-        //     undoStones(board, legalStones);
-        //     if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
-        //         bestStones.first = legalStones.first;
-        //      bestStones.second = legalStones.second;
-        //         bestValue = boardValue;
-        //     }
-        // }
-        Random random = new Random();
-        // List의 크기에 맞게 랜덤한 인덱스 생성
-        int randomIndex = random.nextInt(legalStonesArr.size());
-        // 랜덤하게 선택된 원소 반환
-        return legalStonesArr.get(randomIndex);
+        // Random random = new Random();
+        // // List의 크기에 맞게 랜덤한 인덱스 생성
+        // int randomIndex = random.nextInt(legalStonesArr.size());
+        // // 랜덤하게 선택된 원소 반환
+        // return legalStonesArr.get(randomIndex);
+		return bestStones;
     }
 
 	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
@@ -410,7 +407,6 @@ public class Connect6 {
 	private List<Stones> getLegalStones(int[][] board, int player) {
 
 		int[][] tempBoard = CopyBoard(board);
-		printBoard(tempBoard);
 		int OCCUPIED = -5;
 
         List<Stones> legalStones = new ArrayList<>();
@@ -431,11 +427,6 @@ public class Connect6 {
             }
         }
 
-		printBoard(tempBoard);
-		// System.out.println("LegalStones: " + legalStones.size());
-		// for(Stones stones : legalStones){
-		// 	System.out.println(stones.getPosition());
-		// }
         return legalStones;
     }
 
