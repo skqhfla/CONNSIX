@@ -7,7 +7,7 @@ public class GomokuAI {
     public static final int EMPTY = 0;
     public static final int BLACK = 1;
     public static final int WHITE = 2;
-
+ 
     public static void main(String[] args) {
         int[][] board = new int[SIZE][SIZE];
         for (int[] row : board) {
@@ -139,7 +139,7 @@ public class GomokuAI {
     
     // 보드를 평가하여 점수를 반환합니다.
     public static int evaluate(int[][] board) {
-        // 이 함수는 실제 게임 로직에 맞게 점수를 계산하는 방법을 구현해야 합니다.
+        
         return 0; // 가짜 구현
     }
 

@@ -8,7 +8,7 @@ public class Connect6 {
 	
 	static int Empty = 0;
 	static int Candidate = -1;
-	public int Red;
+	public int Red = 3;
 	public int Ai;
 	public int opponent;
 
@@ -17,7 +17,16 @@ public class Connect6 {
 	int[] dx = {1, 0, 1, 1};
 	int[] dy = {0, 1, 1, -1};
 
-	public Connect6(){
+	int[][] playBoard = new int[ROW][COL];
+
+	public Connect6(String redStones){
+		for(int i = 0; i < 19; i++){
+			for(int j = 0; j < 19; j++){
+				playBoard[i][j] = Empty;
+			}
+		}
+
+		putStones(redStones, Red);
 	}
 	
 	private int[][] CopyBoard(int [][] originBoard) {
@@ -32,7 +41,8 @@ public class Connect6 {
 		return board;
 	}
 	
-	private String Result(Stones stones) {		
+	private String Result(Stones stones) {	
+		putStones(stones.getPosition(), Ai);	
 		return stones.getPosition();
 	}
 	
@@ -49,42 +59,41 @@ public class Connect6 {
 		return stone;
 	}
 
-	public String returnStringCoor(ConnectSix consix) {
-		Stones stones;
-		int[][] playBoard = new int[ROW][COL];
+	private void putStones(String stonesArr, int color){
+		String[] stones = stonesArr.split(":");
+		for(String stone : stones){
+			char charValue = stone.charAt(0);
+			int numericValue = Integer.parseInt(stone.substring(1));
 
-		for (int R = 0; R < ROW; R++) {
-			System.out.printf("%2d ", ROW - R);
-			for (int C = 0; C < COL; C++) {
-				String stone = String.format("%c%02d", (char) ((C < 8) ? (C + 'A') : (C + 'A' + 1)), ROW - R);
-				String temp = consix.getStoneAt(stone);
-				if(temp.equals("EMPTY") == true)
-					playBoard[R][C] = Empty;
-				else if(temp.equals("WHITE") == true)
-					playBoard[R][C] = 2;
-				else if(temp.equals("BLACK") == true)
-					playBoard[R][C] = 1;
-				else if(temp.equals("RED") == true)
-					playBoard[R][C] = Red;
-				
-				System.out.printf("[%3d]", playBoard[R][C]);
-			}
-			System.out.println("");
+			int C = (int) ((charValue < 'I') ? (charValue - 'A') : (charValue - 'A' - 1));
+			int R = ROW - numericValue;
+
+			System.out.println("charValue: " + charValue + ", C: " + C + ", R: " + R);
+
+			playBoard[R][C] = color;
 		}
+	}
+
+	public String returnStringCoor(String opponentStone) {
+		putStones(opponentStone, opponent);
+
+		int[][] board = CopyBoard(playBoard);
+
+		Stones stones;
 		
 
 		for(int i = 0 ; i < 2 ; i++){
 			if(i % 2 == 0)
-				stones = isPossibleConn6(CopyBoard(playBoard), Ai); // Check whether it is possible connect 6 stones
+				stones = isPossibleConn6(board, Ai); // Check whether it is possible connect 6 stones
 			else
-				stones = isPossibleConn6Opponent(playBoard, opponent); // Check whether there are some cases that the opposite could connect 6 stones
+				stones = isPossibleConn6Opponent(board, opponent); // Check whether there are some cases that the opposite could connect 6 stones
 			
 			if(stones != null){
 				if(stones.getSecondStone() != null)
 					return Result(stones);
 				else{
-					playBoard[stones.getFirstStone().x][stones.getFirstStone().y] = Ai;
-					stones.setSecondStone(getRandomStone(playBoard));
+					board[stones.getFirstStone().x][stones.getFirstStone().y] = Ai;
+					stones.setSecondStone(getRandomStone(board));
 					return Result(stones);
 				}
 			}
