@@ -7,6 +7,11 @@ public class Stone {
 		x = -1;
 		y = -1;
 	}
+
+	Stone(int x, int y){
+		this.x = x;
+		this.y = y;
+	}
 	
 	public void setStone(int x, int y) {
 		this.x = x;

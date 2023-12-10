@@ -10,7 +10,8 @@ public class Connect6 {
 	static int Candidate = -1;
 	public int Red;
 	public int Ai;
-	public int opponent;	
+	public int opponent;
+
 	
 	// Four direction: horizon, vertical, right-down diagonal, right-up diagonal.
 	int[] dx = {1, 0, 1, 1};
@@ -89,18 +90,7 @@ public class Connect6 {
 			}
 		}
 		
-		System.out.println("No Stones -> Randomly");
-		// Randomly Put
-		stones = new Stones();
-		
-		for(int i = 0; i < 2; i++) {	
-			if(i == 0){
-				stones.setFirstStone(getRandomStone(playBoard));
-				playBoard[stones.getFirstStone().x][stones.getFirstStone().y] = Ai;
-			}
-			else
-				stones.setSecondStone(getRandomStone(playBoard));
-		}
+		stones = findBestStones(playboard, Ai);
 
 		return Result(stones);
 
@@ -325,5 +315,88 @@ public class Connect6 {
 		return null;
 		
 	}
+
+	private Stones findBestStones(int [][] board, int player){
+
+		Stones bestStones = new Stones();
+		int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+		for (legalStones[] stones : getLegalStoness(board, player)) {
+            applyMove(board, stones, player);
+            int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
+            undoMove(board, stones);
+            if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
+                bestStones.first = stones.first;
+				bestStones.second = stones.second;
+                bestValue = boardValue;
+            }
+        }
+
+        return bestStones;
+	}
+
+	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
+        if (depth == 0 || isTerminal(board)) {
+            return evaluate(board);
+        }
+
+        if (maximizingPlayer) {
+            int value = Integer.MIN_VALUE;
+            for (legalStones[] stones : getLegalStones(board, BLACK)) {
+                applyStones(board, Stones, BLACK);
+                value = Math.max(value, alphabeta(board, depth - 1, alpha, beta, false));
+                undoStones(board, Stones);
+                alpha = Math.max(alpha, value);
+                if (alpha >= beta) {
+                    break; // beta cut-off
+                }
+            }
+            return value;
+        } else {
+            int value = Integer.MAX_VALUE;
+            for (legalStones[] stones : getLegalStones(board, WHITE)) {
+                applyStones(board, Stones, WHITE);
+                value = Math.min(value, alphabeta(board, depth - 1, alpha, beta, true));
+                undoStones(board, Stones);
+                beta = Math.min(beta, value);
+                if (beta <= alpha) {
+                    break; // alpha cut-off
+                }
+            }
+            return value;
+        }
+	}
+
+	private List<Stones> getLegalMoves(int[][] board, int player) {
+        List<Stones> legalStones = new ArrayList<>();
+        for (int i = 0; i < ROW; i++) {
+            for (int j = 0; j < COL; j++) {
+                if (board[i][j] == EMPTY) {
+                    board[i][j] = player;
+                    for (int k = 0; k < ROW; k++) {
+                        for (int l = 0; l < COL; l++) {
+                            if (board[k][l] == EMPTY && !(k == i && l == j)) {
+                                legalMoves.add(new Stones(i, j, k, l));
+                            }
+                        }
+                    }
+                    board[i][j] = EMPTY;
+                }
+            }
+        }
+        return legalStones;
+    }
+
+	public static void applyStones(int[][] board, Stones stones, int player) {
+        for (Stone stone : stones) {
+            board[stone.x][stone.y] = player;
+        }
+    }
+
+    public static void undoMove(int[][] board, Stones stones) {
+        for (Stone stone : stones) {
+            board[stone.x][stone.y] = EMPTY;
+        }
+    }
 
 }
