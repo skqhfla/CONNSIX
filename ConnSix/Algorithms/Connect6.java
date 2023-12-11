@@ -7,11 +7,11 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 3;
+	int MAX_DEPTH = 1;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
-	int Candidate = -1;
+	int Candidate = 5;
 	public int Red = 3;
 	public int Ai;
 	public int opponent;
@@ -34,12 +34,14 @@ public class Connect6 {
 	}
 
 	private void printBoard(int [][] board){
+		System.out.println();
 		for(int i = 0; i < ROW; i++){
 			for(int j = 0; j < COL; j++){
 				System.out.print(board[i][j] + " ");
 			}
 			System.out.println();
 		}
+		System.out.println();
 	}
 	
 	private int[][] CopyBoard(int [][] originBoard) {
@@ -85,7 +87,7 @@ public class Connect6 {
 			int C = (int) ((charValue < 'I') ? (charValue - 'A') : (charValue - 'A' - 1));
 			int R = ROW - numericValue;
 
-			System.out.println("charValue: " + charValue + ", C: " + C + ", R: " + R);
+			System.out.println("C: " + C + ", R: " + R);
 
 			playBoard[R][C] = color;
 		}
@@ -348,10 +350,9 @@ public class Connect6 {
         System.out.println("Start of findBestStones!");
         Stones bestStones = new Stones();
         int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        List<Stones> legalStonesArr = getLegalStones(board, player);
 
         for (Stones legalStones : getLegalStones(board, player)) {
-         System.out.println("Stones in LegalStones: " + legalStones.getPosition());
+         	System.out.println("Stones in LegalStones: " + legalStones.getPosition());
             applyStones(board, legalStones, player);
             int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
             undoStones(board, legalStones);
@@ -371,7 +372,7 @@ public class Connect6 {
 
 	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         if (depth == 0 || isTerminal(board)) {
-			System.out.println("done alphabeta");
+			// System.out.println("done alphabeta");
             return evaluate(board, (maximizingPlayer) ? WHITE : BLACK);
         }
 
@@ -405,28 +406,53 @@ public class Connect6 {
         }
 	}
 
+	private List<Stone> getLegalStone(int[][] board){
+		int [][] temp = CopyBoard(board);
+
+		int[] dx = {1, 0, 1, 1, 0, -1, -1, -1};
+		int[] dy = {0, 1, 1, -1, -1, -1, 0, 1};
+
+		// printBoard(temp);
+
+		List<Stone> legalStoneArr = new ArrayList<>();
+
+		for(int R = 0; R < ROW; R++){
+			for(int C = 0; C < COL; C++){
+
+				if(temp[R][C] != Ai && temp[R][C] != opponent)
+					continue;
+
+				for(int d = 0; d < 8; d++){
+					for(int i = 0; i < 6; i++){
+						if(IsOutOfBounds(R + i * dx[d], C + i * dy[d])){
+							break;
+						}
+
+						if(temp[R + i * dx[d]][C + i * dy[d]] == EMPTY){
+							legalStoneArr.add(new Stone(R + i * dx[d], C + i * dy[d]));
+							temp[R + i * dx[d]][C + i * dy[d]] = Candidate;
+						}
+					}
+				}
+			}
+		}
+
+		// printBoard(temp);
+
+		// System.out.println("legalStone size = " + legalStoneArr.size());
+
+		return legalStoneArr;
+	}
+
 	private List<Stones> getLegalStones(int[][] board, int player) {
-
-		int[][] tempBoard = CopyBoard(board);
-		int OCCUPIED = -5;
-
-        List<Stones> legalStones = new ArrayList<>();
-        for (int i = 0; i < ROW; i++) {
-            for (int j = 0; j < COL; j++) {
-                if (tempBoard[i][j] == EMPTY) {
-                    tempBoard[i][j] = player;
-                    for (int k = 0; k < ROW; k++) {
-                        for (int l = 0; l < COL; l++) {
-                            if (tempBoard[k][l] == EMPTY) {
-                                legalStones.add(new Stones(i, j, k, l));
-                            }
-                        }
-                    }
-                    tempBoard[i][j] = EMPTY;
-                }
-				tempBoard[i][j] = OCCUPIED;
-            }
-        }
+		List<Stones> legalStones = new ArrayList<>();
+		List<Stone> legalStoneArr = getLegalStone(board);
+		
+		for(int i = 0; i < legalStoneArr.size(); i++){
+			for(int j = i + 1; j < legalStoneArr.size(); j++){
+				legalStones.add(new Stones(legalStoneArr.get(i), legalStoneArr.get(j)));
+			}
+		}
 
         return legalStones;
     }
@@ -512,6 +538,8 @@ public class Connect6 {
 				}
 			}
 		}
+
+		System.out.println("value = " + value);
 
 		return value;
     }
