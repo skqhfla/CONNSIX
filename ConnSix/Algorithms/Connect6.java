@@ -468,7 +468,7 @@ public class Connect6 {
 		value += evaluate(board, stones.getFirstStone(), player);
 		applyStone(board, stones.getFirstStone(), player);
 		value += evaluate(board, stones.getSecondStone(), player);
-
+		undoStone(board, stones.getFirstStone());
 		return value;
 	}
 
@@ -482,6 +482,10 @@ public class Connect6 {
 
 		board[firstStone.x][firstStone.y] = player;
 		board[secondStone.x][secondStone.y] = player;
+    }
+
+	private void undoStone(int[][] board, Stone stone) {
+		board[stone.x][stone.y] = EMPTY;
     }
 
     private void undoStones(int[][] board, Stones stones) {
@@ -524,6 +528,8 @@ public class Connect6 {
     }
 
 	private int evaluate(int[][] board, Stone currStone, int player) {
+		System.out.println("Player: " + player);
+
 
 		int[] stoneValue = {1, 3, 6, 12, 30, 100};
 		int totalValue = 0;
@@ -531,6 +537,8 @@ public class Connect6 {
 
 		int[][] tempBoard = CopyBoard(board);
 		tempBoard[currStone.x][currStone.y] = player;
+
+		printBoard(tempBoard);
 
 		for(int d = 0 ; d < 4 ; d++){
 			for(int i = 0 ; i < 6 ; i ++){
@@ -559,8 +567,14 @@ public class Connect6 {
 					if(isPossibleConn6 && playerStone >= 4){
 						totalValue += 5000;
 					}
-					if(playerStone == 1){ totalValue += stoneValue[opponentStone];}
-					if(opponentStone == 0){ totalValue += stoneValue[playerStone];}
+					if(playerStone == 1){ 
+						//System.out.println("playerStone이 1"); 
+						//System.out.println("OpponentStone:" + opponentStone); 
+						totalValue += stoneValue[opponentStone];}
+					if(opponentStone == 0){ 
+						//System.out.println("opponentStone이 0"); 
+						//System.out.println("PlayerStone:" + playerStone);
+						totalValue += stoneValue[playerStone];}
 				}
 			}
 		}
