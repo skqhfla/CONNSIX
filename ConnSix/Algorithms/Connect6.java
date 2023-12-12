@@ -1,5 +1,10 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.AbstractMap;
 import java.util.Random;
 
 public class Connect6 {
@@ -119,7 +124,7 @@ public class Connect6 {
 		}
 		
 		System.out.println("End of checking possibilites");
-		stones = findBestStones(board, Ai);
+		stones = findBestStones(board, Ai, 5);
 		System.out.println("End of findBestStones");
 
 		return Result(stones);
@@ -346,44 +351,41 @@ public class Connect6 {
 		
 	}
 
-	private Stones findBestStones(int [][] board, int player){
+	private Stones findBestStones(int [][] board, int player, int size){
         System.out.println("Start of findBestStones!");
         Stones bestStones = new Stones();
         int bestValue = (player == BLACK) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-        for (Stones legalStones : getLegalStones(board, player)) {
-         	System.out.println("Stones in LegalStones: " + legalStones.getPosition());
-            applyStones(board, legalStones, player);
-            int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player == BLACK);
-            undoStones(board, legalStones);
-            if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
-                bestStones.first = legalStones.first;
-             bestStones.second = legalStones.second;
-                bestValue = boardValue;
-            }
+		List<Map.Entry<Stones, Integer>> legalStonesArr = getLegalStones(board, player, size);
+
+		for (Map.Entry<Stones, Integer> legalStones : legalStonesArr) {
+            System.out.println("Stones in LegalStones: " + legalStones.getKey().getPosition());
+				applyStones(board, legalStones.getKey(), player);
+				int boardValue = alphabeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, player, 20, null);
+				undoStones(board, legalStones.getKey());
+				if ((player == BLACK && boardValue > bestValue) || (player == WHITE && boardValue < bestValue)) {
+					bestStones = legalStones.getKey();
+					bestValue = boardValue;
+				}
         }
-        // Random random = new Random();
-        // // List의 크기에 맞게 랜덤한 인덱스 생성
-        // int randomIndex = random.nextInt(legalStonesArr.size());
-        // // 랜덤하게 선택된 원소 반환
-        // return legalStonesArr.get(randomIndex);
+		
 		return bestStones;
     }
 
-	private int alphabeta(int[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
+	private int alphabeta(int[][] board, int depth, int alpha, int beta, int player, int size, Stones putStones) {
         if (depth == 0 || isTerminal(board)) {
 			// System.out.println("done alphabeta");
-            return evaluate(board, (maximizingPlayer) ? WHITE : BLACK);
+			return scoreofStones(board, putStones, 3 - player);
         }
 
-        if (maximizingPlayer) {
+        if (player == BLACK) {
             int value = Integer.MIN_VALUE;
-			List<Stones> legalStonesArr = getLegalStones(board, BLACK);
-            for (Stones legalStones : legalStonesArr) {
-				System.out.println("alphabeta Stones in LegalStones: " + legalStones.getPosition());
-                applyStones(board, legalStones, BLACK);
-                value = Math.max(value, alphabeta(board, depth - 1, alpha, beta, false));
-                undoStones(board, legalStones);
+			List<Map.Entry<Stones, Integer>> legalStonesArr = getLegalStones(board, BLACK, size);
+            for (Map.Entry<Stones, Integer> legalStones : legalStonesArr) {
+				System.out.println("alphabeta Stones in LegalStones: " + legalStones.getKey().getPosition());
+                applyStones(board, legalStones.getKey(), BLACK);
+                value = Math.max(value, alphabeta(board, depth - 1, alpha, beta, 3 - player, size, legalStones.getKey()));
+                undoStones(board, legalStones.getKey());
                 alpha = Math.max(alpha, value);
                 if (alpha >= beta) {
                     break; // beta cut-off
@@ -392,11 +394,11 @@ public class Connect6 {
             return value;
         } else {
             int value = Integer.MAX_VALUE;
-            List<Stones> legalStonesArr = getLegalStones(board, WHITE);
-            for (Stones legalStones : legalStonesArr) {
-                applyStones(board, legalStones, WHITE);
-                value = Math.min(value, alphabeta(board, depth - 1, alpha, beta, true));
-                undoStones(board, legalStones);
+            List<Map.Entry<Stones, Integer>> legalStonesArr = getLegalStones(board, WHITE, size);
+            for (Map.Entry<Stones, Integer> legalStones : legalStonesArr) {
+                applyStones(board, legalStones.getKey(), WHITE);
+                value = Math.min(value, alphabeta(board, depth - 1, alpha, beta, player, size, legalStones.getKey()));
+                undoStones(board, legalStones.getKey());
                 beta = Math.min(beta, value);
                 if (beta <= alpha) {
                     break; // alpha cut-off
@@ -406,15 +408,13 @@ public class Connect6 {
         }
 	}
 
-	private List<Stone> getLegalStone(int[][] board){
+	private List<Map.Entry<Stone, Integer>> getLegalStone(int[][] board, int player, int size){
 		int [][] temp = CopyBoard(board);
 
 		int[] dx = {1, 0, 1, 1, 0, -1, -1, -1};
 		int[] dy = {0, 1, 1, -1, -1, -1, 0, 1};
 
-		// printBoard(temp);
-
-		List<Stone> legalStoneArr = new ArrayList<>();
+		Map<Stone, Integer> stoneMap = new HashMap<Stone, Integer>();
 
 		for(int R = 0; R < ROW; R++){
 			for(int C = 0; C < COL; C++){
@@ -429,7 +429,8 @@ public class Connect6 {
 						}
 
 						if(temp[R + i * dx[d]][C + i * dy[d]] == EMPTY){
-							legalStoneArr.add(new Stone(R + i * dx[d], C + i * dy[d]));
+							Stone stone = new Stone(R + i * dx[d], C + i * dy[d]);
+							stoneMap.put(stone, evaluate(board, stone, player));
 							temp[R + i * dx[d]][C + i * dy[d]] = Candidate;
 						}
 					}
@@ -437,24 +438,43 @@ public class Connect6 {
 			}
 		}
 
-		// printBoard(temp);
+		List<Map.Entry<Stone, Integer>> sortedEntries = new ArrayList<>(stoneMap.entrySet());
+        sortedEntries.sort(Collections.reverseOrder(Map.Entry.comparingByValue()));
 
-		// System.out.println("legalStone size = " + legalStoneArr.size());
-
-		return legalStoneArr;
+		return sortedEntries.subList(0, size - 1);
 	}
 
-	private List<Stones> getLegalStones(int[][] board, int player) {
-		List<Stones> legalStones = new ArrayList<>();
-		List<Stone> legalStoneArr = getLegalStone(board);
+	private List<Map.Entry<Stones, Integer>> getLegalStones(int[][] board, int player, int size) {
+		Map<Stones, Integer> stonesMap = new HashMap<Stones, Integer>();
+		List<Map.Entry<Stone, Integer>> legalStoneArr = getLegalStone(board, player, size);
 		
 		for(int i = 0; i < legalStoneArr.size(); i++){
 			for(int j = i + 1; j < legalStoneArr.size(); j++){
-				legalStones.add(new Stones(legalStoneArr.get(i), legalStoneArr.get(j)));
+				Stones stones = new Stones(legalStoneArr.get(i).getKey(), legalStoneArr.get(j).getKey());
+				stonesMap.put(stones, scoreofStones(board, stones, player));
 			}
 		}
 
-        return legalStones;
+        List<Map.Entry<Stones, Integer>> legalStonesArr = new ArrayList<>(stonesMap.entrySet());
+        legalStonesArr.sort(Collections.reverseOrder(Map.Entry.comparingByValue()));
+
+		return legalStonesArr.subList(0, size - 1);
+    }
+
+	private int scoreofStones(int[][] board, Stones stones, int player){
+		if(stones == null)
+			return -1;
+
+		int value = 0;
+		value += evaluate(board, stones.getFirstStone(), player);
+		applyStone(board, stones.getFirstStone(), player);
+		value += evaluate(board, stones.getSecondStone(), player);
+
+		return value;
+	}
+
+	private void applyStone(int[][] board, Stone stone, int player) {
+		board[stone.x][stone.y] = player;
     }
 
 	private void applyStones(int[][] board, Stones stones, int player) {
@@ -504,7 +524,7 @@ public class Connect6 {
         return count > 5;
     }
 
-	private int evaluate(int[][] board, int player) {
+	private int evaluate(int[][] board, Stone stone, int player) {
 		int value = 0;
 		
 
