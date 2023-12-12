@@ -19,8 +19,7 @@ public class Connect6 {
 	// Four direction: horizon, vertical, right-down diagonal, right-up diagonal.
 	int[] dx = {1, 0, 1, 1};
 	int[] dy = {0, 1, 1, -1};
-	int[] stoneValue = {1, 3, 6, 12, 30, 100};
-
+	
 	int[][] playBoard = new int[ROW][COL];
 
 	public Connect6(String redStones){
@@ -504,44 +503,48 @@ public class Connect6 {
         return count > 5;
     }
 
-	private int evaluate(int[][] board, int player) {
-		int value = 0;
-		
+	private int evaluate(int[][] board, Stone currStone, int player) {
 
-        for(int R = 0; R < ROW; R++){
-			for(int C = 0; C < COL; C++){
-				int[] tempValue = new int[4];
+		int[] stoneValue = {1, 3, 6, 12, 30, 100};
+		int totalValue = 0;
+		int opponent = 3 - player;
 
-				for(int d = 0; d < 4; d++){
-					if(IsOutOfBounds(R + 5 * dx[d], C + 5 * dy[d])){
-						continue;
+		int[][] tempBoard = CopyBoard(board);
+		tempBoard[currStone.x][currStone.y] = player;
+
+		for(int d = 0 ; d < 4 ; d++){
+			for(int i = 0 ; i < 6 ; i ++){
+				int startingX = currStone.x - i * dx[d];
+				int startingY = currStone.y - i * dy[d];
+				if(IsOutOfBounds(startingX, startingY) || IsOutOfBounds(startingX + 5 * dx[d], startingY + 5 * dy[d])){
+					continue;
+				}
+				int playerStone = 0;
+				int opponentStone = 0;
+				boolean isPossibleConn6 = true; // in terms of player
+				for(int j = 0 ; j < 6 ; j++){
+					int currX = startingX + j * dx[d];
+					int currY = startingY + j * dy[d];
+					if(tempBoard[currX][currY] == player){
+						playerStone++;
+					}
+					else if(tempBoard[currX][currY] == opponent){
+						opponentStone++;
+						isPossibleConn6 = false;
+					}
+					else if(tempBoard[currX][currY] == Red){
+						break; // It is not possible for being conn6 for both of player and opponent.
 					}
 
-					int stones = 0;
-
-					for(int i = 0; i < 6; i++) {
-
-						if(board[R + i * dx[d]][C + i * dy[d]] == player){
-							stones++;
-						}
-						else if(board[R + i * dx[d]][C + i * dy[d]] != EMPTY) {
-							stones = 0;
-							break;
-						}
+					if(isPossibleConn6 && playerStone >= 4){
+						totalValue += 5000;
 					}
-
-					tempValue[d] = stones;
-
-					if(stones > 0)
-						value += stoneValue[stones - 1];
-
+					if(playerStone == 1){ totalValue += stoneValue[opponentStone];}
+					if(opponentStone == 0){ totalValue += stoneValue[playerStone];}
 				}
 			}
 		}
-
-		System.out.println("value = " + value);
-
-		return value;
+		return totalValue;
     }
 
 }
