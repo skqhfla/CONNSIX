@@ -18,15 +18,15 @@ public class DummyAI {
 		String read = "";
 
 		if (color.toLowerCase().compareTo("black") == 0) {
-			con.Ai = 1;
-			con.putStones("K10", con.Ai);
+			con.AI = 1;
+			con.putStones("K10", con.AI);
 			read = conSix.drawAndRead("K10");
 		} else if (color.toLowerCase().compareTo("white") == 0) {
-			con.Ai = 2;
+			con.AI = 2;
 			read = conSix.drawAndRead("");
 		}
 
-		con.opponent = 3 - con.Ai;
+		con.opponent = 3 - con.AI;
 		
 		while (true) {
 			
