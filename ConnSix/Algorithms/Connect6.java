@@ -101,9 +101,10 @@ public class Connect6 {
 		Instant currentTime = Instant.now();
         Duration elapsedDuration = Duration.between(startTime, currentTime);
         long elapsedSeconds = elapsedDuration.getSeconds();
-        if (elapsedSeconds >= checktimeout)
+        if (elapsedSeconds >= checktimeout){
+			System.out.println("----timeout: " + elapsedSeconds + " ----");
 			isTimeout = true;
-
+		}
 	}
 
 	public String returnStringCoor(String opponentStone) {
