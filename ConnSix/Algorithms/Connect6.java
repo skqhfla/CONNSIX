@@ -56,7 +56,9 @@ public class Connect6 {
 			System.out.println();
 		}
 		System.out.print("   ");
-		for (int o = 0; o < 19; o++) {
+		for (int o = 0; o < 20; o++) {
+			if(o == 8)
+				o++;
 			System.out.printf(" %c ", 65 + o);
 		}
 		System.out.println("\n");
