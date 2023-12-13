@@ -13,7 +13,7 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 5;
+	int MAX_DEPTH = 1;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -24,8 +24,8 @@ public class Connect6 {
 	public int opponent;
 
 	int setOfStones = 5;
-	int numOfBestStone = 15;
-	int checktimeout = 25;
+	int numOfBestStone = 13;
+	int checktimeout = 20;
 
 	Instant startTime;
 	boolean isTimeout = false;
@@ -49,12 +49,18 @@ public class Connect6 {
 	private void printBoard(int [][] board){
 		System.out.println();
 		for(int i = 0; i < ROW; i++){
+			System.out.printf("%2d ", 19 - i);
 			for(int j = 0; j < COL; j++){
-				System.out.print(board[i][j] + " ");
+				System.out.printf("[%1d]", board[i][j]);
 			}
 			System.out.println();
 		}
-		System.out.println();
+		System.out.print("   ");
+		for (int o = 0; o < 19; o++) {
+			System.out.printf(" %c ", 65 + o);
+		}
+		System.out.println("\n");
+
 	}
 	
 	private int[][] CopyBoard(int [][] originBoard) {
@@ -590,12 +596,13 @@ public class Connect6 {
 				int playerStone = 0;
 				int opponentStone = 0;
 				boolean isPossibleConn6 = true; // in terms of player
+				Stone baseStone = new Stone(startingX, startingY);
+				System.out.println("[Current Base Position]: " + baseStone.getPosition());
 
 				for(int j = 0 ; j < 6 ; j++){
 					int currX = startingX + j * dx[d];
 					int currY = startingY + j * dy[d];
-					Stone baseStone = new Stone(currX, currY);
-					System.out.println("[Current Base Position]: " + baseStone.getPosition());
+					
 					if(tempBoard[currX][currY] == player){
 						playerStone++;
 					}
