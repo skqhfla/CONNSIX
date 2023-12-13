@@ -13,7 +13,7 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 1;
+	int MAX_DEPTH = 7;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -24,7 +24,7 @@ public class Connect6 {
 	public int opponent;
 
 	int setOfStones = 5;
-	int numOfBestStone = 13;
+	int numOfBestStone = 15;
 	int checktimeout = 20;
 
 	Instant startTime;
@@ -57,8 +57,7 @@ public class Connect6 {
 		}
 		System.out.print("   ");
 		for (int o = 0; o < 20; o++) {
-			if(o == 8)
-				o++;
+			if(o == 8) o++;
 			System.out.printf(" %c ", 65 + o);
 		}
 		System.out.println("\n");
@@ -93,15 +92,21 @@ public class Connect6 {
 		String[] stones = stonesArr.split(":");
 
 		for(String stone : stones){
-			char charValue = stone.charAt(0);
-			int numericValue = Integer.parseInt(stone.substring(1));
+			try{
+				char charValue = stone.charAt(0);
+				int numericValue = Integer.parseInt(stone.substring(1));
 
-			int C = (int) ((charValue < 'I') ? (charValue - 'A') : (charValue - 'A' - 1));
-			int R = ROW - numericValue;
+				int C = (int) ((charValue < 'I') ? (charValue - 'A') : (charValue - 'A' - 1));
+				int R = ROW - numericValue;
 
-			//System.out.println("C: " + C + ", R: " + R);
+				//System.out.println("C: " + C + ", R: " + R);
 
-			playBoard[R][C] = color;
+				playBoard[R][C] = color;
+			}
+			catch (Exception e){
+				continue;
+			}
+			
 		}
 	}
 
@@ -206,6 +211,9 @@ public class Connect6 {
 			Stone first = stoneList.get(idx).getFirstStone();
 			Stone second = stoneList.get(idx).getSecondStone();
 
+			if(first == null)
+				continue;
+
 			board[first.x][first.y] = player;
 			if(second != null)
 				board[second.x][second.y] = player;
@@ -305,6 +313,8 @@ public class Connect6 {
 					bestValue = boardValue;
 				}
 
+				checkTime();
+
 				if(isTimeout)
 					break;
 			}
@@ -400,6 +410,8 @@ public class Connect6 {
 					bestValue = boardValue;
 				}
 
+				checkTime();
+
 				if(isTimeout)
 					break;
         }
@@ -425,6 +437,8 @@ public class Connect6 {
                     break; // beta cut-off
                 }
 
+				checkTime();
+
 				if(isTimeout)
 					break;
             }
@@ -440,6 +454,9 @@ public class Connect6 {
                 if (beta <= alpha) {
                     break; // alpha cut-off
                 }
+
+				checkTime();
+
 				if(isTimeout)
 					break;
             }
@@ -509,10 +526,13 @@ public class Connect6 {
 			return -1;
 
 		double value = 0;
+		System.out.println("---------------------------");
 		value += evaluate(board, stones.getFirstStone(), player);
 		applyStone(board, stones.getFirstStone(), player);
 		value += evaluate(board, stones.getSecondStone(), player);
 		undoStone(board, stones.getFirstStone());
+		System.out.println(stones.getPosition() + " = " + value);
+		System.out.println("---------------------------");
 		return value;
 	}
 
@@ -583,12 +603,12 @@ public class Connect6 {
 		int[][] tempBoard = CopyBoard(board);
 		tempBoard[currStone.x][currStone.y] = player;
 
-		System.out.println("----------------------------------------");
+		//System.out.println("----------------------------------------");
 		System.out.println("[Current Position] " + currStone.getPosition() + "\n");
-		printBoard(tempBoard);
+		//printBoard(tempBoard);
 
 		for(int d = 0 ; d < 4 ; d++){
-			System.out.println("[Currect Direction] " + d);
+			//System.out.println("[Currect Direction] " + d);
 			for(int i = 0 ; i < 6 ; i ++){
 				int startingX = currStone.x - i * dx[d];
 				int startingY = currStone.y - i * dy[d];
@@ -599,7 +619,7 @@ public class Connect6 {
 				int opponentStone = 0;
 				boolean isPossibleConn6 = true; // in terms of player
 				Stone baseStone = new Stone(startingX, startingY);
-				System.out.println("[Current Base Position]: " + baseStone.getPosition());
+				// System.out.println("[Current Base Position]: " + baseStone.getPosition());
 
 				for(int j = 0 ; j < 6 ; j++){
 					int currX = startingX + j * dx[d];
@@ -626,7 +646,7 @@ public class Connect6 {
 
 				if(isPossibleConn6 && (playerStone == 4)){
 					totalValue += 10000;
-					System.out.println("PlayerStone can be Connect6! Add 10,000. | Total Value: " + totalValue);
+					// System.out.println("PlayerStone can be Connect6! Add 10,000. | Total Value: " + totalValue);
 					for(int k = 0 ; k < 6 ; k++){
 						int currX = startingX + k * dx[d];
 						int currY = startingY + k * dy[d];
