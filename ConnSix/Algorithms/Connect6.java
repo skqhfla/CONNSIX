@@ -12,7 +12,7 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 1;
+	int MAX_DEPTH = 2;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -373,7 +373,7 @@ public class Connect6 {
 
 	private int alphabeta(int[][] board, int depth, int alpha, int beta, int player, int size, Stones putStones) {
         if (depth == 0 || isTerminal(board)) {
-			// System.out.println("done alphabeta");
+			System.out.println("done alphabeta " + putStones.getPosition());
 			return scoreofStones(board, putStones, 3 - player);
         }
 
