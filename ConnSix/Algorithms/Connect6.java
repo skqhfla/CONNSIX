@@ -13,7 +13,7 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 5;
+	int MAX_DEPTH = 4;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -24,8 +24,8 @@ public class Connect6 {
 	public int opponent;
 
 	int setOfStones = 5;
-	int numOfBestStone = 15;
-	int checktimeout = 25;
+	int numOfBestStone = 20;
+	int checktimeout = 26;
 
 	Instant startTime;
 	boolean isTimeout = false;
@@ -604,7 +604,7 @@ public class Connect6 {
 		// System.out.println("Player: " + player);
 
 
-		int[] stoneValue = {0, 1, 3, 10, 20, 0, 0};
+		int[] stoneValue = {0, 1, 3, 10, 20, 50, 100};
 		double weight = 1.7;
 		double totalValue = 0;
 		int opponent = 3 - player;
