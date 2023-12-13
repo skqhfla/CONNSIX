@@ -5,14 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.AbstractMap;
-import java.util.Random;
+import java.time.Duration;
+import java.time.Instant;
 
 public class Connect6 {
 
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 4;
+	int MAX_DEPTH = 5;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -24,6 +25,10 @@ public class Connect6 {
 
 	int setOfStones = 5;
 	int numOfBestStone = 15;
+	int checktimeout = 25;
+
+	Instant startTime;
+	boolean isTimeout = false;
 	
 	// Four direction: horizon, vertical, right-down diagonal, right-up diagonal.
 	int[] dx = {1, 0, 1, 1};
@@ -92,7 +97,18 @@ public class Connect6 {
 		}
 	}
 
+	private void checkTime(){
+		Instant currentTime = Instant.now();
+        Duration elapsedDuration = Duration.between(startTime, currentTime);
+        long elapsedSeconds = elapsedDuration.getSeconds();
+        if (elapsedSeconds >= checktimeout)
+			isTimeout = true;
+
+	}
+
 	public String returnStringCoor(String opponentStone) {
+		isTimeout = false;
+		Instant startTime = Instant.now();
 		putStones(opponentStone, opponent);
 
 		int[][] board = CopyBoard(playBoard);
@@ -279,6 +295,9 @@ public class Connect6 {
 					bestStones = stones;
 					bestValue = boardValue;
 				}
+
+				if(isTimeout)
+					break;
 			}
 			else{
 				double boardValue = evaluate(board, stones.getFirstStone(), 3 - opponent);
@@ -333,6 +352,7 @@ public class Connect6 {
 								stones[putcnt] = new Stone();
 	                        	stones[putcnt++].setStone(R + i*dx[d], C + i*dy[d]);
 								
+								System.out.println("Find threat (" + (R + i*dx[d]) + ", " + (C + i*dy[d]) + ")");
 	                        }
 	                    }
 
@@ -370,6 +390,9 @@ public class Connect6 {
 					bestStones = legalStones.getKey();
 					bestValue = boardValue;
 				}
+
+				if(isTimeout)
+					break;
         }
 		
 		return bestStones;
@@ -377,7 +400,6 @@ public class Connect6 {
 
 	private double alphabeta(int[][] board, int depth, double alpha, double beta, int player, int size, Stones putStones) {
         if (depth == 0 || isTerminal(board)) {
-			// System.out.println("done alphabeta");
 			return scoreofStones(board, putStones, 3 - player);
         }
 
@@ -393,6 +415,9 @@ public class Connect6 {
                 if (alpha >= beta) {
                     break; // beta cut-off
                 }
+
+				if(isTimeout)
+					break;
             }
             return value;
         } else {
@@ -406,6 +431,8 @@ public class Connect6 {
                 if (beta <= alpha) {
                     break; // alpha cut-off
                 }
+				if(isTimeout)
+					break;
             }
             return value;
         }
