@@ -238,22 +238,30 @@ public class Connect6 {
 
 		if(stoneList.size() == 1){
 
-			Stones candiate = new Stones(stoneList.get(0).getFirstStone(), null);
-			stoneCandidateList.add(candiate);
+			Stones candidate;
+			
+			if(stoneList.get(0).getFirstStone() != null){
+				candidate = new Stones(stoneList.get(0).getFirstStone(), null);
+				stoneCandidateList.add(candidate);
+			}				
 
-			candiate = new Stones(stoneList.get(0).getSecondStone(), null);
-			stoneCandidateList.add(candiate);
+			if(stoneList.get(0).getSecondStone() != null){
+				candidate = new Stones(stoneList.get(0).getSecondStone(), null);
+				stoneCandidateList.add(candidate);
+			}
+			
+			
 		}
 		else if(stoneList.size() == 2){
-			Stones[] candiateList = new Stones[4];
+			Stones[] candidateList = new Stones[4];
 
-			candiateList[0] = new Stones(stoneList.get(0).getFirstStone(), stoneList.get(1).getFirstStone());
-			candiateList[1] = new Stones(stoneList.get(0).getSecondStone(), stoneList.get(1).getFirstStone());
-			candiateList[2] = new Stones(stoneList.get(0).getFirstStone(), stoneList.get(1).getSecondStone());
-			candiateList[3] = new Stones(stoneList.get(0).getSecondStone(), stoneList.get(1).getSecondStone());
+			candidateList[0] = new Stones(stoneList.get(0).getFirstStone(), stoneList.get(1).getFirstStone());
+			candidateList[1] = new Stones(stoneList.get(0).getSecondStone(), stoneList.get(1).getFirstStone());
+			candidateList[2] = new Stones(stoneList.get(0).getFirstStone(), stoneList.get(1).getSecondStone());
+			candidateList[3] = new Stones(stoneList.get(0).getSecondStone(), stoneList.get(1).getSecondStone());
 
 			for(int i = 0; i < 4; i++){
-				stoneCandidateList.add(candiateList[i]);
+				stoneCandidateList.add(candidateList[i]);
 			}
 		}
 
@@ -414,9 +422,12 @@ public class Connect6 {
 		for(int R = 0; R < ROW; R++){
 			for(int C = 0; C < COL; C++){
 
-				if(temp[R][C] != AI && temp[R][C] != opponent)
-					continue;
-
+				if(temp[R][C] == EMPTY){
+						Stone stone = new Stone(R, C);
+						stoneMap.put(stone, evaluate(board, stone, player));
+						temp[R][C] = CANDIDATE;
+				}
+				/* 
 				for(int d = 0; d < 8; d++){
 					for(int i = 0; i < 6; i++){
 						if(IsOutOfBounds(R + i * dx[d], C + i * dy[d])){
@@ -429,7 +440,7 @@ public class Connect6 {
 							temp[R + i * dx[d]][C + i * dy[d]] = CANDIDATE;
 						}
 					}
-				}
+				} */
 			}
 		}
 
@@ -527,17 +538,20 @@ public class Connect6 {
 		// System.out.println("Player: " + player);
 
 
-		int[] stoneValue = {0, 1, 3, 6, 12, 30, 100};
-		double weight = 1.5;
+		int[] stoneValue = {0, 1, 3, 10, 20, 0, 0};
+		double weight = 1.7;
 		double totalValue = 0;
 		int opponent = 3 - player;
 
 		int[][] tempBoard = CopyBoard(board);
 		tempBoard[currStone.x][currStone.y] = player;
 
-		// printBoard(tempBoard);
+		System.out.println("----------------------------------------");
+		System.out.println("[Current Position] " + currStone.getPosition() + "\n");
+		printBoard(tempBoard);
 
 		for(int d = 0 ; d < 4 ; d++){
+			System.out.println("[Currect Direction] " + d);
 			for(int i = 0 ; i < 6 ; i ++){
 				int startingX = currStone.x - i * dx[d];
 				int startingY = currStone.y - i * dy[d];
@@ -547,9 +561,12 @@ public class Connect6 {
 				int playerStone = 0;
 				int opponentStone = 0;
 				boolean isPossibleConn6 = true; // in terms of player
+
 				for(int j = 0 ; j < 6 ; j++){
 					int currX = startingX + j * dx[d];
 					int currY = startingY + j * dy[d];
+					Stone baseStone = new Stone(currX, currY);
+					System.out.println("[Current Base Position]: " + baseStone.getPosition());
 					if(tempBoard[currX][currY] == player){
 						playerStone++;
 					}
@@ -558,21 +575,37 @@ public class Connect6 {
 						isPossibleConn6 = false;
 					}
 					else if(tempBoard[currX][currY] == RED){
+						playerStone = 0;
+						opponentStone = 0;
+						isPossibleConn6 = false;
 						break; // It is not possible for being conn6 for both of player and opponent.
+					}
+					else if(tempBoard[currX][currY] == CANDIDATE){
+						isPossibleConn6 = false; // because the possiblity of conn6 is already considered.
 					}
 				}
 
-				if(isPossibleConn6 && playerStone == 4){
-						totalValue += 10000;
+
+				if(isPossibleConn6 && (playerStone == 4)){
+					totalValue += 10000;
+					System.out.println("PlayerStone can be Connect6! Add 10,000. | Total Value: " + totalValue);
+					for(int k = 0 ; k < 6 ; k++){
+						int currX = startingX + k * dx[d];
+						int currY = startingY + k * dy[d];
+						if(tempBoard[currX][currY] == EMPTY){
+							tempBoard[currX][currY] = CANDIDATE;
+						}
 					}
-					if(playerStone == 1){ 
-						// System.out.println("playerStone Count: 1 | OpponentStone Count: " + opponentStone); 
-						totalValue += stoneValue[opponentStone] * weight;}
-					if(opponentStone == 0){ 
-						// System.out.println("opponentStone Count: 0 | playerStone Count: " + playerStone); 
-						totalValue += stoneValue[playerStone];}
+				}
+				if(playerStone == 1){ 
+					// System.out.println("playerStone Count: 1 | OpponentStone Count: " + opponentStone); 
+					totalValue += stoneValue[opponentStone] * weight;}
+				if(opponentStone == 0){ 
+					// System.out.println("opponentStone Count: 0 | playerStone Count: " + playerStone); 
+					totalValue += stoneValue[playerStone];}
 			}
 		}
+		System.out.println("The Score: " + totalValue);
 		return totalValue;
     }
 
