@@ -484,13 +484,13 @@ public class Connect6 {
 		for(int R = 0; R < ROW; R++){
 			for(int C = 0; C < COL; C++){
 
-				
+				/*
 				if(temp[R][C] == EMPTY){
 						Stone stone = new Stone(R, C);
 						stoneMap.put(stone, evaluate(board, stone, player));
 						temp[R][C] = CANDIDATE;
-				} 
-				/* 
+				} */
+				
 				for(int d = 0; d < 8; d++){
 					for(int i = 0; i < 6; i++){
 						if(IsOutOfBounds(R + i * dx[d], C + i * dy[d])){
@@ -504,7 +504,6 @@ public class Connect6 {
 						}
 					}
 				}
-				*/
 			}
 		}
 
