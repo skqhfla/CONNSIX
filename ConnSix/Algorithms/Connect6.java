@@ -511,6 +511,9 @@ public class Connect6 {
 		applyStone(board, stones.getFirstStone(), player);
 		value += evaluate(board, stones.getSecondStone(), player);
 		undoStone(board, stones.getFirstStone());
+
+		printBoard(board);
+		System.out.println("for " + stones.getPosition() + " : " + value);
 		return value;
 	}
 
@@ -581,12 +584,7 @@ public class Connect6 {
 		int[][] tempBoard = CopyBoard(board);
 		tempBoard[currStone.x][currStone.y] = player;
 
-		System.out.println("----------------------------------------");
-		System.out.println("[Current Position] " + currStone.getPosition() + "\n");
-		printBoard(tempBoard);
-
 		for(int d = 0 ; d < 4 ; d++){
-			System.out.println("[Currect Direction] " + d);
 			for(int i = 0 ; i < 6 ; i ++){
 				int startingX = currStone.x - i * dx[d];
 				int startingY = currStone.y - i * dy[d];
@@ -597,7 +595,6 @@ public class Connect6 {
 				int opponentStone = 0;
 				boolean isPossibleConn6 = true; // in terms of player
 				Stone baseStone = new Stone(startingX, startingY);
-				System.out.println("[Current Base Position]: " + baseStone.getPosition());
 
 				for(int j = 0 ; j < 6 ; j++){
 					int currX = startingX + j * dx[d];
@@ -624,7 +621,6 @@ public class Connect6 {
 
 				if(isPossibleConn6 && (playerStone == 4)){
 					totalValue += 10000;
-					System.out.println("PlayerStone can be Connect6! Add 10,000. | Total Value: " + totalValue);
 					for(int k = 0 ; k < 6 ; k++){
 						int currX = startingX + k * dx[d];
 						int currY = startingY + k * dy[d];
@@ -641,7 +637,7 @@ public class Connect6 {
 					totalValue += stoneValue[playerStone];}
 			}
 		}
-		System.out.println("The Score: " + totalValue);
+
 		return totalValue;
     }
 
