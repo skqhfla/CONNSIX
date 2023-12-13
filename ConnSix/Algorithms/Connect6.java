@@ -13,7 +13,7 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 1;
+	int MAX_DEPTH = 5;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -24,7 +24,7 @@ public class Connect6 {
 	public int opponent;
 
 	int setOfStones = 5;
-	int numOfBestStone = 13;
+	int numOfBestStone = 20;
 	int checktimeout = 20;
 
 	Instant startTime;
