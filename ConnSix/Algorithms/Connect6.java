@@ -313,6 +313,8 @@ public class Connect6 {
 					bestValue = boardValue;
 				}
 
+				checkTime();
+
 				if(isTimeout)
 					break;
 			}
@@ -408,6 +410,8 @@ public class Connect6 {
 					bestValue = boardValue;
 				}
 
+				checkTime();
+
 				if(isTimeout)
 					break;
         }
@@ -433,6 +437,8 @@ public class Connect6 {
                     break; // beta cut-off
                 }
 
+				checkTime();
+
 				if(isTimeout)
 					break;
             }
@@ -448,6 +454,9 @@ public class Connect6 {
                 if (beta <= alpha) {
                     break; // alpha cut-off
                 }
+
+				checkTime();
+
 				if(isTimeout)
 					break;
             }
