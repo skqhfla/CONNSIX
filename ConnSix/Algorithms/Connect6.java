@@ -13,7 +13,7 @@ public class Connect6 {
 	int ROW = 19;
 	int COL = 19;
 	
-	int MAX_DEPTH = 7;
+	int MAX_DEPTH = 5;
 	int EMPTY = 0;
 	int BLACK = 1;
 	int WHITE = 2;
@@ -25,7 +25,7 @@ public class Connect6 {
 
 	int setOfStones = 5;
 	int numOfBestStone = 15;
-	int checktimeout = 20;
+	int checktimeout = 25;
 
 	Instant startTime;
 	boolean isTimeout = false;
@@ -122,7 +122,7 @@ public class Connect6 {
 
 	public String returnStringCoor(String opponentStone) {
 		isTimeout = false;
-		Instant startTime = Instant.now();
+		startTime = Instant.now();
 		putStones(opponentStone, opponent);
 
 		int[][] board = CopyBoard(playBoard);
@@ -150,6 +150,12 @@ public class Connect6 {
 		// System.out.println("End of checking possibilites");
 		stones = findBestStones(board, AI, setOfStones);
 		// System.out.println("End of findBestStones");
+
+		Instant currentTime = Instant.now();
+        Duration elapsedDuration = Duration.between(startTime, currentTime);
+        long elapsedSeconds = elapsedDuration.getSeconds();
+
+		System.out.println("------ end time " + elapsedSeconds + "-----");
 
 		return Result(stones);
 
@@ -302,6 +308,9 @@ public class Connect6 {
 
 		double bestValue = 0;
 		Stones bestStones = null;
+
+		if(stoneCandidateList.size() == 1)
+			return stoneCandidateList.get(0);
 
 		for(Stones stones : stoneCandidateList){
 			if(stones.getSecondStone() != null){
@@ -526,13 +535,13 @@ public class Connect6 {
 			return -1;
 
 		double value = 0;
-		System.out.println("---------------------------");
+		// System.out.println("---------------------------");
 		value += evaluate(board, stones.getFirstStone(), player);
 		applyStone(board, stones.getFirstStone(), player);
 		value += evaluate(board, stones.getSecondStone(), player);
 		undoStone(board, stones.getFirstStone());
-		System.out.println(stones.getPosition() + " = " + value);
-		System.out.println("---------------------------");
+		// System.out.println(stones.getPosition() + " = " + value);
+		// System.out.println("---------------------------");
 		return value;
 	}
 
@@ -604,7 +613,7 @@ public class Connect6 {
 		tempBoard[currStone.x][currStone.y] = player;
 
 		//System.out.println("----------------------------------------");
-		System.out.println("[Current Position] " + currStone.getPosition() + "\n");
+		// System.out.println("[Current Position] " + currStone.getPosition() + "\n");
 		//printBoard(tempBoard);
 
 		for(int d = 0 ; d < 4 ; d++){
@@ -663,7 +672,7 @@ public class Connect6 {
 					totalValue += stoneValue[playerStone];}
 			}
 		}
-		System.out.println("The Score: " + totalValue);
+		// System.out.println("The Score: " + totalValue);
 		return totalValue;
     }
 

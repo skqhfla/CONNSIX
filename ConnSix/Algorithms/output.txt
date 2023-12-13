@@ -1,1 +1,0 @@
-Input the ip address > Input the port number > Input the color > Red Stone positions are null
