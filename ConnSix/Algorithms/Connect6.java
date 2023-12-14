@@ -25,7 +25,7 @@ public class Connect6 {
 
 	int setOfStones = 5;
 	int numOfBestStone = 20;
-	int checktimeout = 26;
+	int checktimeout = 28;
 
 	Instant startTime;
 	boolean isTimeout = false;
@@ -75,9 +75,41 @@ public class Connect6 {
 		
 		return board;
 	}
+
+	private Stone FindOneStone() {
+		for (int i = 0; i < ROW; i++) {
+            for (int j = 0; j < COL; j++) {
+                if (playBoard[i][j] != EMPTY)
+                    continue;
+
+				Stone stone = new Stone();
+                stone.setStone(i, j);
+                return stone;
+            }
+        }
+
+		return null;
+	}
 	
 	private String Result(Stones stones) {	
-		putStones(stones.getPosition(), AI);	
+		if(stones.first == null || stones.first.x == -1){
+			Stone dumy = FindOneStone();
+
+			if(dumy != null)
+				stones.first = dumy;
+		}
+
+		putStones(stones.getPosition(), AI);
+
+		if(stones.second == null || stones.second.x == -1)	{
+			Stone dumy = FindOneStone();
+
+			if(dumy != null)
+				stones.second = dumy;
+		}
+
+		putStones(stones.getPosition(), AI);
+
 		return stones.getPosition();
 	}
 	
@@ -104,6 +136,7 @@ public class Connect6 {
 				playBoard[R][C] = color;
 			}
 			catch (Exception e){
+				System.out.println("error for putStones");
 				continue;
 			}
 			
@@ -111,13 +144,16 @@ public class Connect6 {
 	}
 
 	private void checkTime(){
-		Instant currentTime = Instant.now();
-        Duration elapsedDuration = Duration.between(startTime, currentTime);
-        long elapsedSeconds = elapsedDuration.getSeconds();
-        if (elapsedSeconds >= checktimeout){
-			System.out.println("----timeout: " + elapsedSeconds + " ----");
-			isTimeout = true;
+		if(!isTimeout){
+			Instant currentTime = Instant.now();
+			Duration elapsedDuration = Duration.between(startTime, currentTime);
+			long elapsedSeconds = elapsedDuration.getSeconds();
+			if (elapsedSeconds >= checktimeout){
+				System.out.println("----timeout: " + elapsedSeconds + " ----");
+				isTimeout = true;
+			}
 		}
+		
 	}
 
 	public String returnStringCoor(String opponentStone) {
@@ -380,7 +416,7 @@ public class Connect6 {
 								stones[putcnt] = new Stone();
 	                        	stones[putcnt++].setStone(R + i*dx[d], C + i*dy[d]);
 								
-								System.out.println("Find threat (" + (R + i*dx[d]) + ", " + (C + i*dy[d]) + ")");
+								// System.out.println("Find threat (" + (R + i*dx[d]) + ", " + (C + i*dy[d]) + ")");
 	                        }
 	                    }
 
@@ -484,13 +520,13 @@ public class Connect6 {
 		for(int R = 0; R < ROW; R++){
 			for(int C = 0; C < COL; C++){
 
-				/*
+				
 				if(temp[R][C] == EMPTY){
 						Stone stone = new Stone(R, C);
 						stoneMap.put(stone, evaluate(board, stone, player));
 						temp[R][C] = CANDIDATE;
-				} */
-				
+				} 
+				/* 
 				for(int d = 0; d < 8; d++){
 					for(int i = 0; i < 6; i++){
 						if(IsOutOfBounds(R + i * dx[d], C + i * dy[d])){
@@ -504,6 +540,7 @@ public class Connect6 {
 						}
 					}
 				}
+				*/
 			}
 		}
 
@@ -544,61 +581,6 @@ public class Connect6 {
 		// System.out.println("---------------------------");
 		return value;
 	}
-
-	private void applyStone(int[][] board, Stone stone, int player) {
-		board[stone.x][stone.y] = player;
-    }
-
-	private void applyStones(int[][] board, Stones stones, int player) {
-		Stone firstStone = stones.getFirstStone();
-		Stone secondStone = stones.getSecondStone();
-
-		board[firstStone.x][firstStone.y] = player;
-		board[secondStone.x][secondStone.y] = player;
-    }
-
-	private void undoStone(int[][] board, Stone stone) {
-		board[stone.x][stone.y] = EMPTY;
-    }
-
-    private void undoStones(int[][] board, Stones stones) {
-		Stone firstStone = stones.getFirstStone();
-		Stone secondStone = stones.getSecondStone();
-
-		board[firstStone.x][firstStone.y] = EMPTY;
-		board[secondStone.x][secondStone.y] = EMPTY;
-    }
-
-	private boolean isTerminal(int[][] board) {
-		// 흑돌과 백돌 모두에 대해 승리 조건을 검사
-		return checkLines(board, BLACK) || checkLines(board, WHITE);
-	}
-	
-	private boolean checkLines(int[][] board, int player) {
-		for (int i = 0; i < ROW; i++) {
-			for (int j = 0; j < COL; j++) {
-				if (board[i][j] == player) {
-					for(int d = 0; d < 4; d++){
-						if(checkExactStones(board, i, j, dx[d], dy[d], player))
-							return true;
-					}
-				}
-			}
-		}
-
-		return false;
-    }
-
-	private boolean checkExactStones(int[][] board, int x, int y, int dx, int dy, int player) {
-        int count = 0;
-        while (x >= 0 && x < ROW && y >= 0 && y < COL && board[x][y] == player) {
-            count++;
-            x += dx;
-            y += dy;
-        }
-		
-        return count > 5;
-    }
 
 	private double evaluate(int[][] board, Stone currStone, int player) {
 		// System.out.println("Player: " + player);
@@ -674,6 +656,61 @@ public class Connect6 {
 		}
 		// System.out.println("The Score: " + totalValue);
 		return totalValue;
+    }
+
+	private void applyStone(int[][] board, Stone stone, int player) {
+		board[stone.x][stone.y] = player;
+    }
+
+	private void applyStones(int[][] board, Stones stones, int player) {
+		Stone firstStone = stones.getFirstStone();
+		Stone secondStone = stones.getSecondStone();
+
+		board[firstStone.x][firstStone.y] = player;
+		board[secondStone.x][secondStone.y] = player;
+    }
+
+	private void undoStone(int[][] board, Stone stone) {
+		board[stone.x][stone.y] = EMPTY;
+    }
+
+    private void undoStones(int[][] board, Stones stones) {
+		Stone firstStone = stones.getFirstStone();
+		Stone secondStone = stones.getSecondStone();
+
+		board[firstStone.x][firstStone.y] = EMPTY;
+		board[secondStone.x][secondStone.y] = EMPTY;
+    }
+
+	private boolean isTerminal(int[][] board) {
+		// 흑돌과 백돌 모두에 대해 승리 조건을 검사
+		return checkLines(board, BLACK) || checkLines(board, WHITE);
+	}
+	
+	private boolean checkLines(int[][] board, int player) {
+		for (int i = 0; i < ROW; i++) {
+			for (int j = 0; j < COL; j++) {
+				if (board[i][j] == player) {
+					for(int d = 0; d < 4; d++){
+						if(checkExactStones(board, i, j, dx[d], dy[d], player))
+							return true;
+					}
+				}
+			}
+		}
+
+		return false;
+    }
+
+	private boolean checkExactStones(int[][] board, int x, int y, int dx, int dy, int player) {
+        int count = 0;
+        while (x >= 0 && x < ROW && y >= 0 && y < COL && board[x][y] == player) {
+            count++;
+            x += dx;
+            y += dy;
+        }
+		
+        return count > 5;
     }
 
 }
